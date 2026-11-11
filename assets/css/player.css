@@ -1,0 +1,9 @@
+/* LB Simple Podcast: estilos mínimos y de baja especificidad, fáciles de sobrescribir desde el tema. */
+.lb-sp-player {
+	margin: 0 0 1.5em;
+}
+
+.lb-sp-player__audio {
+	display: block;
+	width: 100%;
+}

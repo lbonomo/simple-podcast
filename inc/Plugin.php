@@ -97,6 +97,7 @@ final class Plugin {
 			'meta_box'      => new Admin\MetaBox(),
 			'settings_page' => new Admin\SettingsPage(),
 			'feed'          => new Feed\FeedRegistrar(),
+			'player'        => new Frontend\PlayerInjector(),
 			'seo_headers'   => new Integrations\SeoHeaders(),
 			'mcp_ability'   => new Integrations\McpAbility(),
 		);

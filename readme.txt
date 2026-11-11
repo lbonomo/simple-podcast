@@ -18,6 +18,7 @@ LB Simple Podcast convierte tus entradas en episodios de podcast sin instalar un
 * **Feed RSS para podcatchers:** `/feed/podcast/` (o `?feed=podcast`) con RSS 2.0 y etiquetas iTunes, `enclosure`, GUID persistente, fechas RFC 2822, `ETag` / `Last-Modified` y respuestas 304.
 * **Ajustes del canal:** Ajustes > Podcast (título, descripción, idioma, imagen, categoría de Apple, autor, propietario, contenido explícito y copyright).
 * **REST API:** el campo `audio_data` en `wp/v2/posts` (`attachment_id`, `url`, `mime_type`, `filesize`, `duration`).
+* **Reproductor en la entrada:** se agrega automáticamente un `<audio controls>` al inicio del contenido de las entradas con audio, independiente del tema. Va dentro de `<div class="lb-sp-player">` (el audio tiene la clase `lb-sp-player__audio`) para que el tema lo personalice con CSS. Ver las preguntas frecuentes.
 * **SEO:** `og:audio` y JSON-LD `AudioObject` en las entradas con audio, sin duplicar lo que ya imprima otro plugin o tema.
 * **Ability MCP:** `lb-simple-podcast/publish-post-audio` permite que un agente de IA adjunte un MP3 (por URL o base64) a una entrada. Requiere WordPress 6.9 o superior; el plugin MCP Adapter la publica como tool MCP.
 
@@ -43,6 +44,14 @@ Si los enlaces permanentes no funcionan tras activar el plugin, visita Ajustes >
 
 Solo MP3 (`audio/mpeg`).
 
+= ¿Cómo personalizo el reproductor desde el tema? =
+
+* **CSS:** estiliza `.lb-sp-player` y `.lb-sp-player__audio`. El CSS del plugin es mínimo y de baja especificidad.
+* **Plantilla:** copia `templates/player.php` del plugin a `{tema}/lb-simple-podcast/player.php` y cambia el marcado. Recibe `$audio` (`url`, `mime_type`, `filesize`, `duration`, `attachment_id`) y `$post`.
+* **Filtros:** `lb_sp_player_enabled` (bool, `$post`) para desactivarlo; `lb_sp_player_position` (`before` o `after`, `$post`); `lb_sp_player_html` (HTML, `$audio`, `$post`); `lb_sp_player_enqueue_styles` (bool) para no cargar el CSS del plugin.
+
+Ejemplo: `add_filter( 'lb_sp_player_position', fn() => 'after' );`
+
 = ¿Cómo uso la ability MCP? =
 
 Activa el plugin MCP Adapter y llama a `lb-simple-podcast/publish-post-audio` con `post_id` y uno de `audio_url` o `audio_base64`. Hay un ejemplo en `docs/mcp-tool-schema.md` del repositorio.
@@ -58,4 +67,5 @@ Dependen de tu servidor web; Apache y Nginx las admiten por defecto para archivo
 == Changelog ==
 
 = 0.1.0 =
+* Reproductor automático en las entradas con audio, personalizable desde el tema.
 * Primera versión: audio por entrada, feed de podcast, ajustes del canal, SEO y ability MCP.
