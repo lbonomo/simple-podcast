@@ -1,0 +1,35 @@
+name: Build release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Generar lb-simple-podcast.zip
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          tools: composer
+          coverage: none
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: composer install --no-interaction --no-progress
+      - run: bin/build-zip.sh
+      - run: bin/verify-zip.sh lb-simple-podcast.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lb-simple-podcast
+          path: lb-simple-podcast.zip
+          if-no-files-found: error

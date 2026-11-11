@@ -1,0 +1,8 @@
+/vendor/
+/node_modules/
+/build/
+/*.zip
+/tests/phpunit/wp-tests-config.php
+.phpunit.result.cache
+.phpcs-cache
+.DS_Store

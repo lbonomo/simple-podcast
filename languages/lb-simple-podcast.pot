@@ -1,0 +1,292 @@
+# Copyright (C) 2026 Leandro Bonomo
+# This file is distributed under the GPL-2.0-or-later.
+msgid ""
+msgstr ""
+"Project-Id-Version: LB Simple Podcast 0.1.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/lb-simple-podcast\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-11-11T11:55:29-03:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: lb-simple-podcast\n"
+
+#. Plugin Name of the plugin
+#: lb-simple-podcast.php
+msgid "LB Simple Podcast"
+msgstr ""
+
+#. Description of the plugin
+#: lb-simple-podcast.php
+msgid "Asocia un MP3 a cada entrada, publica un feed RSS de podcast, agrega metadatos SEO y expone una ability MCP."
+msgstr ""
+
+#. Author of the plugin
+#: lb-simple-podcast.php
+msgid "Leandro Bonomo"
+msgstr ""
+
+#: inc/Admin/MetaBox.php:59
+#: assets/src/index.js:15
+msgid "Podcast (audio MP3)"
+msgstr ""
+
+#: inc/Admin/MetaBox.php:94
+#: inc/Admin/MetaBox.php:127
+#: assets/src/AudioPanel.js:82
+msgid "Seleccionar MP3"
+msgstr ""
+
+#: inc/Admin/MetaBox.php:95
+msgid "Usar este audio"
+msgstr ""
+
+#: inc/Admin/MetaBox.php:97
+#: inc/Media/AudioValidator.php:97
+#: inc/Media/AudioValidator.php:126
+#: assets/src/AudioPanel.js:35
+msgid "Solo se admiten archivos MP3 (audio/mpeg)."
+msgstr ""
+
+#: inc/Admin/MetaBox.php:121
+msgid "Sin audio asociado."
+msgstr ""
+
+#: inc/Admin/MetaBox.php:128
+#: assets/src/AudioPanel.js:90
+msgid "Quitar audio"
+msgstr ""
+
+#: inc/Admin/SettingsPage.php:138
+#: inc/Admin/SettingsPage.php:139
+#: inc/Admin/SettingsPage.php:305
+#: inc/Integrations/McpAbility.php:65
+msgid "Podcast"
+msgstr ""
+
+#: inc/Admin/SettingsPage.php:179
+msgid "El idioma no es válido (ejemplos: es, es-AR, en-US)."
+msgstr ""
+
+#: inc/Admin/SettingsPage.php:191
+msgid "La categoría no es una categoría válida de Apple Podcasts."
+msgstr ""
+
+#: inc/Admin/SettingsPage.php:203
+msgid "El email del propietario no es válido."
+msgstr ""
+
+#: inc/Admin/SettingsPage.php:239
+msgid "La imagen del canal debe ser JPG o PNG."
+msgstr ""
+
+#. translators: 1: tamaño mínimo, 2: tamaño máximo.
+#: inc/Admin/SettingsPage.php:251
+#, php-format
+msgid "La imagen del canal debe ser cuadrada, de %1$d a %2$d píxeles por lado."
+msgstr ""
+
+#: inc/Admin/SettingsPage.php:286
+msgid "Imagen del canal"
+msgstr ""
+
+#: inc/Admin/SettingsPage.php:287
+msgid "Usar esta imagen"
+msgstr ""
+
+#: inc/Admin/SettingsPage.php:307
+msgid "URL del feed:"
+msgstr ""
+
+#: inc/Admin/SettingsPage.php:314
+msgid "Título"
+msgstr ""
+
+#: inc/Admin/SettingsPage.php:317
+msgid "Descripción"
+msgstr ""
+
+#: inc/Admin/SettingsPage.php:321
+msgid "Idioma (ej. es-AR)"
+msgstr ""
+
+#: inc/Admin/SettingsPage.php:322
+msgid "Autor"
+msgstr ""
+
+#: inc/Admin/SettingsPage.php:323
+msgid "Propietario: nombre"
+msgstr ""
+
+#: inc/Admin/SettingsPage.php:324
+msgid "Propietario: email"
+msgstr ""
+
+#: inc/Admin/SettingsPage.php:325
+msgid "Copyright"
+msgstr ""
+
+#: inc/Admin/SettingsPage.php:328
+msgid "Categoría"
+msgstr ""
+
+#: inc/Admin/SettingsPage.php:331
+msgid "— Seleccionar —"
+msgstr ""
+
+#: inc/Admin/SettingsPage.php:339
+msgid "Contenido explícito"
+msgstr ""
+
+#: inc/Admin/SettingsPage.php:342
+msgid "No"
+msgstr ""
+
+#: inc/Admin/SettingsPage.php:343
+msgid "Sí"
+msgstr ""
+
+#: inc/Admin/SettingsPage.php:348
+msgid "Imagen"
+msgstr ""
+
+#: inc/Admin/SettingsPage.php:356
+msgid "Seleccionar imagen"
+msgstr ""
+
+#: inc/Admin/SettingsPage.php:357
+msgid "Quitar"
+msgstr ""
+
+#: inc/Admin/SettingsPage.php:358
+msgid "JPG o PNG cuadrada, de 1400 a 3000 píxeles por lado."
+msgstr ""
+
+#: inc/Integrations/McpAbility.php:66
+msgid "Abilities para gestionar el audio de los episodios del podcast."
+msgstr ""
+
+#: inc/Integrations/McpAbility.php:78
+msgid "Publicar audio en una entrada"
+msgstr ""
+
+#: inc/Integrations/McpAbility.php:79
+msgid "Adjunta un archivo MP3 a una entrada existente (desde una URL pública o en base64) para que aparezca como episodio en el feed de podcast. Envíe exactamente uno de audio_url o audio_base64. Si la entrada ya tenía un audio creado por este plugin, lo reemplaza."
+msgstr ""
+
+#: inc/Integrations/McpAbility.php:115
+msgid "ID de la entrada (post) a la que se adjunta el audio."
+msgstr ""
+
+#: inc/Integrations/McpAbility.php:119
+msgid "URL http(s) pública de un archivo MP3. Alternativa a audio_base64."
+msgstr ""
+
+#: inc/Integrations/McpAbility.php:123
+msgid "Contenido del MP3 en base64 (admite el prefijo data:audio/mpeg;base64,). Alternativa a audio_url."
+msgstr ""
+
+#: inc/Integrations/McpAbility.php:127
+msgid "Nombre de archivo sugerido (solo con audio_base64)."
+msgstr ""
+
+#: inc/Integrations/McpAbility.php:131
+msgid "Título del audio/episodio en la biblioteca de medios."
+msgstr ""
+
+#: inc/Integrations/McpAbility.php:196
+msgid "Indique audio_url o audio_base64."
+msgstr ""
+
+#: inc/Integrations/McpAbility.php:199
+msgid "Indique solo uno: audio_url o audio_base64."
+msgstr ""
+
+#: inc/Media/AudioIngestor.php:89
+msgid "El contenido base64 está vacío."
+msgstr ""
+
+#: inc/Media/AudioIngestor.php:102
+msgid "El contenido no es base64 válido."
+msgstr ""
+
+#: inc/Media/AudioIngestor.php:109
+msgid "No se pudo guardar el audio temporal."
+msgstr ""
+
+#: inc/Media/AudioIngestor.php:129
+msgid "La URL del audio no es válida o no está permitida."
+msgstr ""
+
+#: inc/Media/AudioIngestor.php:194
+msgid "No se pudo crear el archivo temporal."
+msgstr ""
+
+#: inc/Media/AudioIngestor.php:209
+msgid "No se pudo descargar el audio."
+msgstr ""
+
+#. translators: %d: código HTTP.
+#: inc/Media/AudioIngestor.php:218
+#, php-format
+msgid "La descarga del audio falló (HTTP %d)."
+msgstr ""
+
+#: inc/Media/AudioIngestor.php:267
+msgid "No se pudo asociar el audio a la entrada."
+msgstr ""
+
+#: inc/Media/AudioIngestor.php:278
+msgid "El audio se guardó pero no se pudo leer."
+msgstr ""
+
+#: inc/Media/AudioIngestor.php:306
+msgid "La entrada indicada no existe."
+msgstr ""
+
+#. translators: %s: tamaño máximo legible.
+#: inc/Media/AudioIngestor.php:319
+#: inc/Media/AudioValidator.php:89
+#, php-format
+msgid "El archivo de audio supera el tamaño máximo permitido (%s)."
+msgstr ""
+
+#: inc/Media/AudioValidator.php:76
+#: inc/Media/AudioValidator.php:131
+msgid "El archivo de audio no existe o no se puede leer."
+msgstr ""
+
+#: inc/Media/AudioValidator.php:81
+msgid "El archivo de audio está vacío."
+msgstr ""
+
+#: inc/Media/AudioValidator.php:104
+msgid "No se pudo leer la duración del audio; el archivo puede estar dañado."
+msgstr ""
+
+#: inc/Media/AudioValidator.php:122
+msgid "El ID no corresponde a un archivo de la biblioteca de medios."
+msgstr ""
+
+#: inc/Meta/AudioMeta.php:62
+msgid "ID del archivo MP3 de la biblioteca de medios asociado a la entrada."
+msgstr ""
+
+#: inc/Meta/AudioMeta.php:152
+msgid "Datos del audio MP3 asociado, o null."
+msgstr ""
+
+#: lb-simple-podcast.php:29
+msgid "LB Simple Podcast: falta el autoload de Composer (vendor/autoload.php)."
+msgstr ""
+
+#: assets/src/AudioPanel.js:57
+msgid "Audio seleccionado"
+msgstr ""
+
+#: assets/src/AudioPanel.js:81
+msgid "Reemplazar MP3"
+msgstr ""

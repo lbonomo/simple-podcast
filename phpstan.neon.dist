@@ -1,0 +1,12 @@
+parameters:
+    level: 8
+    paths:
+        - inc
+        - lb-simple-podcast.php
+        - uninstall.php
+        - templates
+    bootstrapFiles:
+        - tests/phpstan/bootstrap.php
+    excludePaths:
+        - vendor
+        - node_modules

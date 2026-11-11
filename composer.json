@@ -1,0 +1,49 @@
+{
+	"name": "lbonomo/lb-simple-podcast",
+	"description": "Asocia un MP3 a cada post, publica un feed RSS de podcast, agrega SEO y expone una ability MCP.",
+	"type": "wordpress-plugin",
+	"license": "GPL-2.0-or-later",
+	"require": {
+		"php": ">=8.1"
+	},
+	"require-dev": {
+		"phpunit/phpunit": "9.6.33",
+		"yoast/phpunit-polyfills": "2.0.2",
+		"wp-phpunit/wp-phpunit": "7.1.3",
+		"phpstan/phpstan": "1.12.16",
+		"szepeviktor/phpstan-wordpress": "1.3.5",
+		"phpstan/extension-installer": "1.4.3",
+		"php-stubs/wordpress-stubs": "6.9.4",
+		"wp-coding-standards/wpcs": "3.4.1",
+		"phpcompatibility/phpcompatibility-wp": "2.1.5",
+		"dealerdirect/phpcodesniffer-composer-installer": "1.0.0"
+	},
+	"autoload": {
+		"psr-4": {
+			"LbSimplePodcast\\": "inc/"
+		}
+	},
+	"autoload-dev": {
+		"psr-4": {
+			"LbSimplePodcast\\Tests\\": "tests/phpunit/"
+		}
+	},
+	"config": {
+		"optimize-autoloader": true,
+		"sort-packages": true,
+		"platform": {
+			"php": "8.1.0"
+		},
+		"allow-plugins": {
+			"dealerdirect/phpcodesniffer-composer-installer": true,
+			"phpstan/extension-installer": true
+		}
+	},
+	"scripts": {
+		"test": "phpunit",
+		"test:unit": "phpunit --testsuite unit",
+		"phpstan": "phpstan analyse --memory-limit=1G",
+		"phpcs": "phpcs",
+		"phpcbf": "phpcbf"
+	}
+}
