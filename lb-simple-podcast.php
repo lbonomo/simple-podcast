@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       LB Simple Podcast
  * Description:       Asocia un MP3 a cada entrada, publica un feed RSS de podcast, agrega metadatos SEO y expone una ability MCP.
- * Version:           0.2.0
+ * Version:           0.3.0
  * Requires at least: 6.4
  * Requires PHP:      8.1
  * Author:            Leandro Bonomo
@@ -16,7 +16,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'LB_SP_VERSION', '0.2.0' );
+define( 'LB_SP_VERSION', '0.3.0' );
 define( 'LB_SP_FILE', __FILE__ );
 define( 'LB_SP_DIR', plugin_dir_path( __FILE__ ) );
 define( 'LB_SP_URL', plugin_dir_url( __FILE__ ) );
@@ -34,6 +34,17 @@ if ( ! is_readable( LB_SP_DIR . 'vendor/autoload.php' ) ) {
 }
 
 require_once LB_SP_DIR . 'vendor/autoload.php';
+
+// Actualizaciones automáticas desde los releases de GitHub.
+if ( class_exists( \YahnisElsts\PluginUpdateChecker\v5\PucFactory::class ) ) {
+	$lb_sp_updater = \YahnisElsts\PluginUpdateChecker\v5\PucFactory::buildUpdateChecker(
+		'https://github.com/lbonomo/simple-podcast/',
+		__FILE__,
+		'lb-simple-podcast'
+	);
+	// Usar el ZIP adjunto al release (carpeta lb-simple-podcast/) en vez del zipball del código.
+	$lb_sp_updater->getVcsApi()->enableReleaseAssets( '/lb-simple-podcast\.zip$/i' );
+}
 
 register_activation_hook( __FILE__, array( \LbSimplePodcast\Plugin::class, 'activate' ) );
 register_deactivation_hook( __FILE__, array( \LbSimplePodcast\Plugin::class, 'deactivate' ) );
