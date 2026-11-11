@@ -4,7 +4,7 @@ Tags: podcast, rss, audio, mp3, mcp
 Requires at least: 6.4
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 0.1.0
+Stable tag: 0.2.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -66,6 +66,8 @@ Dependen de tu servidor web; Apache y Nginx las admiten por defecto para archivo
 
 == Changelog ==
 
-= 0.1.0 =
+= 0.2.0 =
 * Reproductor automático en las entradas con audio, personalizable desde el tema.
+
+= 0.1.0 =
 * Primera versión: audio por entrada, feed de podcast, ajustes del canal, SEO y ability MCP.
