@@ -68,6 +68,18 @@ Los attachments creados por el plugin llevan el meta `_lb_sp_ingested`. Al reemp
 
 Filtros: `lb_sp_seo_output_og`, `lb_sp_seo_output_jsonld`, `lb_sp_seo_jsonld`.
 
+### Reproductor en la entrada
+
+`Frontend\PlayerInjector` (servicio `player`) filtra `the_content` (prioridad 20). Solo actúa en la vista singular de una entrada (`is_singular('post')`, `in_the_loop()`, `is_main_query()`), nunca en feeds, archivos, extractos ni entradas con contraseña, y solo si `AudioMeta::get_audio_data()` devuelve un MP3. El HTML sale de `templates/player.php`, que el tema puede sobrescribir en `{tema}/lb-simple-podcast/player.php`:
+
+```html
+<div class="lb-sp-player" data-post-id="123">
+  <audio class="lb-sp-player__audio" controls preload="none" src="..."></audio>
+</div>
+```
+
+El CSS (`assets/css/player.css`) se registra siempre pero se encola solo al renderizar el reproductor.
+
 ### Filtros y hooks públicos
 
 | Filtro | Uso |
@@ -79,6 +91,7 @@ Filtros: `lb_sp_seo_output_og`, `lb_sp_seo_output_jsonld`, `lb_sp_seo_jsonld`.
 | `lb_sp_feed_channel`, `lb_sp_feed_items` | Datos del canal y de los episodios antes de renderizar. |
 | `lb_sp_episode_explicit`, `lb_sp_episode_type` | `itunes:explicit` e `itunes:episodeType` por episodio. |
 | `lb_sp_seo_output_og`, `lb_sp_seo_output_jsonld`, `lb_sp_seo_jsonld` | Metadatos SEO. |
+| `lb_sp_player_enabled`, `lb_sp_player_position`, `lb_sp_player_html`, `lb_sp_player_enqueue_styles` | Reproductor en la entrada (activación, posición `before`/`after`, HTML y CSS). |
 
 ## Desinstalación
 `uninstall.php` borra las opciones (`lb_sp_channel`, `lb_sp_feed_version`) y el transient del feed. No toca los attachments ni el meta de las entradas, para no perder contenido del usuario.
