@@ -1,6 +1,8 @@
 /vendor/
 /node_modules/
 /build/
+/logs/
+*.js.map
 /*.zip
 /tests/phpunit/wp-tests-config.php
 .phpunit.result.cache
