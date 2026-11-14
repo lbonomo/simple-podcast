@@ -4,7 +4,7 @@ Tags: podcast, rss, audio, mp3, mcp
 Requires at least: 6.4
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 0.5.0
+Stable tag: 0.6.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -67,6 +67,10 @@ No. La desinstalación elimina las opciones y la tabla de registros del plugin; 
 La ruta de entrega del plugin admite HEAD y rangos simples de bytes. Los archivos originales y las redirecciones a almacenamiento externo dependen del servidor que los sirve.
 
 == Changelog ==
+
+= 0.6.0 =
+* Agrega una prueba E2E para publicar episodios con audio y verifica el reproductor y el feed.
+* Añade un comando local para consultar los registros de solicitudes de audio.
 
 = 0.5.0 =
 * Registro de cada solicitud de audio en una tabla SQL propia con mantenimiento mediante WordPress.

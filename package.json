@@ -1,6 +1,6 @@
 {
 	"name": "lb-simple-podcast",
-	"version": "0.5.0",
+	"version": "0.6.0",
 	"private": true,
 	"description": "Sidebar de Gutenberg de LB Simple Podcast",
 	"license": "GPL-2.0-or-later",
@@ -10,12 +10,15 @@
 	"scripts": {
 		"build": "wp-scripts build --webpack-src-dir=assets/src --output-path=assets/build",
 		"env:start": "wp-env start",
+		"logs": "wp-env run cli -- wp eval-file wp-content/plugins/simple-podcast/scripts/list-audio-logs.php",
 		"prestart": "node scripts/check-composer-vendor.js",
 		"start": "wp-scripts start --webpack-src-dir=assets/src --output-path=assets/build",
 		"test": "wp-scripts test-unit-jest --config=jest.config.js",
+		"test:e2e": "wp-scripts test-e2e",
 		"lint:js": "wp-scripts lint-js assets/src"
 	},
 	"devDependencies": {
+		"@wordpress/e2e-test-utils-playwright": "^3.2.0",
 		"@wordpress/env": "^12.1.0",
 		"@wordpress/scripts": "37.1.0",
 		"jest": "30.5.2",

@@ -2,6 +2,7 @@
 /node_modules/
 /build/
 /logs/
+/artifacts/
 *.js.map
 /*.zip
 /tests/phpunit/wp-tests-config.php
