@@ -1,9 +1,12 @@
 assets/src/
+assets/build/*.map
 /bin/
 /build/
+AGENTS.md
 composer.json
 composer.lock
 .distignore
+.kiro/
 docs/
 .git
 .github
@@ -11,6 +14,7 @@ docs/
 jest.config.js
 .lando.yml
 node_modules/
+logs/
 package.json
 package-lock.json
 .phpcs-cache
@@ -18,5 +22,6 @@ phpcs.xml.dist
 phpstan.neon.dist
 .phpunit.result.cache
 phpunit.xml.dist
+scripts/
 tests/
 *.zip
