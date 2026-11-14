@@ -15,6 +15,7 @@ use LbSimplePodcast\Feed\FeedRegistrar;
 use LbSimplePodcast\Feed\FeedVersion;
 use LbSimplePodcast\Feed\PodcastFeedRenderer;
 use LbSimplePodcast\Meta\AudioMeta;
+use LbSimplePodcast\Media\AudioDelivery;
 use SimpleXMLElement;
 use WP_UnitTestCase;
 
@@ -138,7 +139,7 @@ final class FeedOutputTest extends WP_UnitTestCase {
 		$file    = dirname( __DIR__ ) . '/fixtures/sample.mp3';
 
 		$enclosure = $item->enclosure->attributes();
-		$this->assertSame( wp_get_attachment_url( $this->mp3_id ), (string) $enclosure['url'] );
+		$this->assertSame( AudioDelivery::url( $post_id, $this->mp3_id ), (string) $enclosure['url'] );
 		$this->assertSame( (string) filesize( $file ), (string) $enclosure['length'] );
 		$this->assertSame( 'audio/mpeg', (string) $enclosure['type'] );
 

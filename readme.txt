@@ -4,13 +4,15 @@ Tags: podcast, rss, audio, mp3, mcp
 Requires at least: 6.4
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 0.4.0
+Stable tag: 0.5.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
 Asocia un MP3 a cada entrada y publica un feed RSS de podcast compatible con Apple Podcasts, con SEO y una ability MCP.
 
 == Description ==
+
+Las solicitudes a los audios se registran automáticamente, incluyendo la IP observada, la URL completa y todas las cabeceras disponibles. Pueden contener cookies, tokens, credenciales y datos personales y se conservan sin límite hasta desinstalar. Consulte la documentación de arquitectura y evalúe las obligaciones de privacidad antes de usarlo. Los archivos originales públicos y cachés externas pueden seguir siendo accesibles sin pasar por el registro.
 
 LB Simple Podcast convierte tus entradas en episodios de podcast sin instalar un sistema aparte.
 
@@ -58,13 +60,18 @@ Activa el plugin MCP Adapter y llama a `lb-simple-podcast/publish-post-audio` co
 
 = ¿Se borran mis audios al desinstalar? =
 
-No. La desinstalación elimina solo las opciones del plugin; los archivos de la biblioteca y el meta de las entradas se conservan.
+No. La desinstalación elimina las opciones y la tabla de registros del plugin; los archivos de la biblioteca, el meta de las entradas y las copias protegidas se conservan.
 
 = ¿Funcionan las peticiones HEAD y de rango en los MP3? =
 
-Dependen de tu servidor web; Apache y Nginx las admiten por defecto para archivos estáticos.
+La ruta de entrega del plugin admite HEAD y rangos simples de bytes. Los archivos originales y las redirecciones a almacenamiento externo dependen del servidor que los sirve.
 
 == Changelog ==
+
+= 0.5.0 =
+* Registro de cada solicitud de audio en una tabla SQL propia con mantenimiento mediante WordPress.
+* Ruta de entrega compatible con HEAD y rangos simples, integrada en el reproductor, feed, REST, SEO y MCP.
+* Copias protegidas opcionales y avisos sobre accesos directos y almacenamiento de datos sensibles.
 
 = 0.4.0 =
 * Fija la rama principal para comprobar actualizaciones desde GitHub y cambia el nombre mostrado del plugin.

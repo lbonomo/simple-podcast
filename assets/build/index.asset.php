@@ -12,5 +12,5 @@
 		'wp-media-utils',
 		'wp-plugins'
 	),
-	'version' => '2a913312f0cface55616'
+	'version' => '4587068a71377b32f14f'
 );

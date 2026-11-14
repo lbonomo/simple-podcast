@@ -113,7 +113,7 @@ final class MetaBox {
 		<p id="lb-sp-audio-summary">
 			<?php
 			if ( null !== $audio ) {
-				echo esc_html( basename( $audio['url'] ) );
+				echo esc_html( basename( (string) get_attached_file( $id ) ) );
 				if ( $audio['duration'] > 0 ) {
 					echo ' (' . esc_html( gmdate( $audio['duration'] >= 3600 ? 'G:i:s' : 'i:s', $audio['duration'] ) ) . ')';
 				}
