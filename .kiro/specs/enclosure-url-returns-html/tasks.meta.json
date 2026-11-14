@@ -1,0 +1,192 @@
+{
+  "pbtResults": {
+    "1. Write bug condition exploration test": {
+      "status": "passed",
+      "failingExample": "DONOTCACHEPAGE not defined after do_action('init') with $_GET['lb_sp_audio']; AudioDelivery::url() with get_permalink()===false returns '?lb_sp_audio=7&lb_sp_attachment=6' (expected http://example.org/index.php?...); feed enclosure url 'http://example.org/?p=11&lb_sp_audio=11&lb_sp_attachment=10' starts with home_url('/?')",
+      "lastRunTimestamp": 1794698191870
+    },
+    "3.6 Verify bug condition exploration test now passes": {
+      "status": "passed",
+      "lastRunTimestamp": 1794698662335
+    }
+  },
+  "executionHistory": {
+    "1. Write bug condition exploration test": [
+      {
+        "executionId": "7957aa79-403a-4586-9127-55968088a984",
+        "chatSessionId": "sess_c87782bd-b2d1-4a95-b451-4124058295c7",
+        "timestamp": 1794697911129
+      },
+      {
+        "executionId": "7957aa79-403a-4586-9127-55968088a984",
+        "chatSessionId": "sess_c87782bd-b2d1-4a95-b451-4124058295c7",
+        "timestamp": 1794697917835
+      },
+      {
+        "executionId": "7957aa79-403a-4586-9127-55968088a984",
+        "chatSessionId": "sess_c87782bd-b2d1-4a95-b451-4124058295c7",
+        "timestamp": 1794698208120
+      }
+    ],
+    "2. Write preservation property tests (BEFORE implementing fix)": [
+      {
+        "executionId": "7957aa79-403a-4586-9127-55968088a984",
+        "chatSessionId": "sess_c87782bd-b2d1-4a95-b451-4124058295c7",
+        "timestamp": 1794697911203
+      },
+      {
+        "executionId": "7957aa79-403a-4586-9127-55968088a984",
+        "chatSessionId": "sess_c87782bd-b2d1-4a95-b451-4124058295c7",
+        "timestamp": 1794698211367
+      },
+      {
+        "executionId": "7957aa79-403a-4586-9127-55968088a984",
+        "chatSessionId": "sess_c87782bd-b2d1-4a95-b451-4124058295c7",
+        "timestamp": 1794698324214
+      }
+    ],
+    "3.1 Unificar la URL de entrega con respaldo `index.php`": [
+      {
+        "executionId": "7957aa79-403a-4586-9127-55968088a984",
+        "chatSessionId": "sess_c87782bd-b2d1-4a95-b451-4124058295c7",
+        "timestamp": 1794697911275
+      },
+      {
+        "executionId": "7957aa79-403a-4586-9127-55968088a984",
+        "chatSessionId": "sess_c87782bd-b2d1-4a95-b451-4124058295c7",
+        "timestamp": 1794698327384
+      },
+      {
+        "executionId": "7957aa79-403a-4586-9127-55968088a984",
+        "chatSessionId": "sess_c87782bd-b2d1-4a95-b451-4124058295c7",
+        "timestamp": 1794698388031
+      }
+    ],
+    "3.2 Añadir exclusión de caché temprana en `init`": [
+      {
+        "executionId": "7957aa79-403a-4586-9127-55968088a984",
+        "chatSessionId": "sess_c87782bd-b2d1-4a95-b451-4124058295c7",
+        "timestamp": 1794697911358
+      },
+      {
+        "executionId": "7957aa79-403a-4586-9127-55968088a984",
+        "chatSessionId": "sess_c87782bd-b2d1-4a95-b451-4124058295c7",
+        "timestamp": 1794698392042
+      },
+      {
+        "executionId": "7957aa79-403a-4586-9127-55968088a984",
+        "chatSessionId": "sess_c87782bd-b2d1-4a95-b451-4124058295c7",
+        "timestamp": 1794698506420
+      }
+    ],
+    "3.3 Garantizar paridad GET/HEAD": [
+      {
+        "executionId": "7957aa79-403a-4586-9127-55968088a984",
+        "chatSessionId": "sess_c87782bd-b2d1-4a95-b451-4124058295c7",
+        "timestamp": 1794697911561
+      },
+      {
+        "executionId": "7957aa79-403a-4586-9127-55968088a984",
+        "chatSessionId": "sess_c87782bd-b2d1-4a95-b451-4124058295c7",
+        "timestamp": 1794698509790
+      },
+      {
+        "executionId": "7957aa79-403a-4586-9127-55968088a984",
+        "chatSessionId": "sess_c87782bd-b2d1-4a95-b451-4124058295c7",
+        "timestamp": 1794698539392
+      }
+    ],
+    "3.4 Revisar feed y `audio_data.url`": [
+      {
+        "executionId": "7957aa79-403a-4586-9127-55968088a984",
+        "chatSessionId": "sess_c87782bd-b2d1-4a95-b451-4124058295c7",
+        "timestamp": 1794697911635
+      },
+      {
+        "executionId": "7957aa79-403a-4586-9127-55968088a984",
+        "chatSessionId": "sess_c87782bd-b2d1-4a95-b451-4124058295c7",
+        "timestamp": 1794698542710
+      },
+      {
+        "executionId": "7957aa79-403a-4586-9127-55968088a984",
+        "chatSessionId": "sess_c87782bd-b2d1-4a95-b451-4124058295c7",
+        "timestamp": 1794698607314
+      }
+    ],
+    "3.5 Documentar la exclusión de caché en `readme.txt`": [
+      {
+        "executionId": "7957aa79-403a-4586-9127-55968088a984",
+        "chatSessionId": "sess_c87782bd-b2d1-4a95-b451-4124058295c7",
+        "timestamp": 1794697911718
+      },
+      {
+        "executionId": "7957aa79-403a-4586-9127-55968088a984",
+        "chatSessionId": "sess_c87782bd-b2d1-4a95-b451-4124058295c7",
+        "timestamp": 1794698610659
+      },
+      {
+        "executionId": "7957aa79-403a-4586-9127-55968088a984",
+        "chatSessionId": "sess_c87782bd-b2d1-4a95-b451-4124058295c7",
+        "timestamp": 1794698632655
+      }
+    ],
+    "3.6 Verify bug condition exploration test now passes": [
+      {
+        "executionId": "7957aa79-403a-4586-9127-55968088a984",
+        "chatSessionId": "sess_c87782bd-b2d1-4a95-b451-4124058295c7",
+        "timestamp": 1794697911795
+      },
+      {
+        "executionId": "7957aa79-403a-4586-9127-55968088a984",
+        "chatSessionId": "sess_c87782bd-b2d1-4a95-b451-4124058295c7",
+        "timestamp": 1794698636037
+      },
+      {
+        "executionId": "7957aa79-403a-4586-9127-55968088a984",
+        "chatSessionId": "sess_c87782bd-b2d1-4a95-b451-4124058295c7",
+        "timestamp": 1794698669850
+      }
+    ],
+    "3.7 Verify preservation tests still pass": [
+      {
+        "executionId": "7957aa79-403a-4586-9127-55968088a984",
+        "chatSessionId": "sess_c87782bd-b2d1-4a95-b451-4124058295c7",
+        "timestamp": 1794697911867
+      },
+      {
+        "executionId": "7957aa79-403a-4586-9127-55968088a984",
+        "chatSessionId": "sess_c87782bd-b2d1-4a95-b451-4124058295c7",
+        "timestamp": 1794698673316
+      },
+      {
+        "executionId": "7957aa79-403a-4586-9127-55968088a984",
+        "chatSessionId": "sess_c87782bd-b2d1-4a95-b451-4124058295c7",
+        "timestamp": 1794698706861
+      }
+    ],
+    "4. Checkpoint - Ensure all tests pass": [
+      {
+        "executionId": "7957aa79-403a-4586-9127-55968088a984",
+        "chatSessionId": "sess_c87782bd-b2d1-4a95-b451-4124058295c7",
+        "timestamp": 1794697911935
+      },
+      {
+        "executionId": "7957aa79-403a-4586-9127-55968088a984",
+        "chatSessionId": "sess_c87782bd-b2d1-4a95-b451-4124058295c7",
+        "timestamp": 1794698710580
+      },
+      {
+        "executionId": "7957aa79-403a-4586-9127-55968088a984",
+        "chatSessionId": "sess_c87782bd-b2d1-4a95-b451-4124058295c7",
+        "timestamp": 1794698960030
+      }
+    ],
+    "3. Fix for enclosure URL que devuelve HTML en GET": [
+      {
+        "executionId": "7957aa79-403a-4586-9127-55968088a984",
+        "chatSessionId": "sess_c87782bd-b2d1-4a95-b451-4124058295c7",
+        "timestamp": 1794698707023
+      }
+    ]
+  }
+}
