@@ -7,6 +7,8 @@
 
 declare(strict_types=1);
 
+// phpcs:disable WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Lectura de archivos locales del plugin, no URLs remotas.
+
 namespace LbSimplePodcast\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
