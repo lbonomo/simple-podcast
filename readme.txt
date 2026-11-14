@@ -4,7 +4,7 @@ Tags: podcast, rss, audio, mp3, mcp
 Requires at least: 6.4
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 0.3.0
+Stable tag: 0.4.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -65,6 +65,9 @@ No. La desinstalación elimina solo las opciones del plugin; los archivos de la 
 Dependen de tu servidor web; Apache y Nginx las admiten por defecto para archivos estáticos.
 
 == Changelog ==
+
+= 0.4.0 =
+* Fija la rama principal para comprobar actualizaciones desde GitHub y cambia el nombre mostrado del plugin.
 
 = 0.3.0 =
 * Actualizaciones automáticas desde los releases de GitHub.

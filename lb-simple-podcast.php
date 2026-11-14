@@ -1,8 +1,8 @@
 <?php
 /**
- * Plugin Name:       LB Simple Podcast
+ * Plugin Name:       Simple Podcast
  * Description:       Asocia un MP3 a cada entrada, publica un feed RSS de podcast, agrega metadatos SEO y expone una ability MCP.
- * Version:           0.3.0
+ * Version:           0.4.0
  * Requires at least: 6.4
  * Requires PHP:      8.1
  * Author:            Leandro Bonomo
@@ -16,7 +16,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'LB_SP_VERSION', '0.3.0' );
+define( 'LB_SP_VERSION', '0.4.0' );
 define( 'LB_SP_FILE', __FILE__ );
 define( 'LB_SP_DIR', plugin_dir_path( __FILE__ ) );
 define( 'LB_SP_URL', plugin_dir_url( __FILE__ ) );
@@ -42,8 +42,14 @@ if ( class_exists( \YahnisElsts\PluginUpdateChecker\v5\PucFactory::class ) ) {
 		__FILE__,
 		'lb-simple-podcast'
 	);
-	// Usar el ZIP adjunto al release (carpeta lb-simple-podcast/) en vez del zipball del código.
-	$lb_sp_updater->getVcsApi()->enableReleaseAssets( '/lb-simple-podcast\.zip$/i' );
+	if ( $lb_sp_updater instanceof \YahnisElsts\PluginUpdateChecker\v5p6\Vcs\PluginUpdateChecker ) {
+		$lb_sp_updater->setBranch( 'main' );
+		$lb_sp_updater_api = $lb_sp_updater->getVcsApi();
+		if ( $lb_sp_updater_api instanceof \YahnisElsts\PluginUpdateChecker\v5p6\Vcs\GitHubApi ) {
+			// Usar el ZIP adjunto al release (carpeta lb-simple-podcast/) en vez del zipball del código.
+			$lb_sp_updater_api->enableReleaseAssets( '/lb-simple-podcast\.zip$/i' );
+		}
+	}
 }
 
 register_activation_hook( __FILE__, array( \LbSimplePodcast\Plugin::class, 'activate' ) );

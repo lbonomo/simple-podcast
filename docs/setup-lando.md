@@ -34,6 +34,8 @@ lando wp plugin activate simple-podcast
 lando wp rewrite flush --hard
 ```
 
+`npm run start` comprueba que exista `vendor/autoload.php` antes de iniciar webpack. Si falta, ejecuta `composer install`.
+
 ### Base de datos de pruebas
 Los tests de integración usan la base `wordpress_test` (prefijo `wptests_`), separada de la del sitio. Se crea una vez:
 
@@ -97,6 +99,14 @@ lando wp plugin install /app/wordpress/wp-content/plugins/simple-podcast/lb-simp
 lando wp plugin deactivate lb-simple-podcast && lando wp plugin delete lb-simple-podcast
 lando wp plugin activate simple-podcast
 ```
+
+## Verificar las actualizaciones de GitHub
+
+El actualizador consulta `https://github.com/lbonomo/simple-podcast/` sin credenciales. El repositorio debe ser público; GitHub devuelve 404 para los repositorios privados cuando no se envía autenticación. La rama configurada es `main`.
+
+Cada release estable debe adjuntar `lb-simple-podcast.zip`, generado por el workflow de publicación, para distribuir las dependencias de Composer y los assets compilados.
+
+Después de cambiar la visibilidad del repositorio o la configuración del actualizador, usa **Comprobar actualizaciones** en la fila del plugin dentro de **Plugins** para volver a consultar GitHub. Si la versión instalada coincide con el último release, el resultado esperado es que no haya actualizaciones disponibles, sin errores de la API.
 
 ## Probar la ability MCP
 Activar `mcp-adapter` (`lando wp plugin activate mcp-adapter`) y seguir el ejemplo de [mcp-tool-schema.md](mcp-tool-schema.md). Para una URL de prueba que apunte al propio Lando (red privada) se puede permitir el host con el filtro `lb_sp_audio_url_allowlist`.
