@@ -153,6 +153,67 @@ final class FeedOutputTest extends WP_UnitTestCase {
 		$this->assertSame( 'full', (string) $itunes->episodeType ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName
 	}
 
+	/**
+	 * Preservation (enclosure-url-returns-html): guid, length, type y duration no cambian; solo `url` puede variar.
+	 */
+	public function test_preserved_enclosure_guid_length_type_and_duration_for_every_item(): void {
+		$ids   = array(
+			$this->episode( array( 'post_title' => 'Uno' ) ),
+			$this->episode( array( 'post_title' => 'Dos' ) ),
+			$this->episode( array( 'post_title' => 'Tres' ) ),
+		);
+		$size  = (string) filesize( dirname( __DIR__ ) . '/fixtures/sample.mp3' );
+		$items = $this->xml()->xpath( '//item' );
+
+		$this->assertCount( 3, $items );
+		$seen = array();
+		foreach ( $items as $item ) {
+			$enclosure = $item->enclosure->attributes();
+			$this->assertSame( $size, (string) $enclosure['length'] );
+			$this->assertSame( 'audio/mpeg', (string) $enclosure['type'] );
+			$this->assertNotSame( '', (string) $enclosure['url'] );
+			$this->assertSame( 'false', (string) $item->guid->attributes()['isPermaLink'] );
+			$this->assertMatchesRegularExpression( '/^\d{2}:\d{2}:\d{2}$/', (string) $item->children( self::ITUNES )->duration );
+			$seen[] = (string) $item->guid;
+		}
+		$expected = array_map( static fn( int $id ): string => get_post( $id )->guid, $ids );
+		sort( $expected );
+		sort( $seen );
+		$this->assertSame( $expected, $seen );
+	}
+
+	public function test_bug_condition_enclosure_url_matches_delivery_url_and_is_not_site_root(): void {
+		// Con permalinks planos el permalink es home_url( '/?p=N' ) y la URL empieza legítimamente por home_url( '/?' ).
+		// Se fijan permalinks bonitos para que la aserción de "no raíz con query" sea válida.
+		$this->set_permalink_structure( '/%postname%/' );
+		flush_rewrite_rules();
+		try {
+			$post_id = $this->episode();
+
+			$url = (string) $this->xml()->channel->item[0]->enclosure->attributes()['url'];
+
+			$this->assertSame( AudioDelivery::url( $post_id, $this->mp3_id ), $url );
+			$this->assertStringStartsNotWith( home_url( '/?' ), $url );
+		} finally {
+			$this->set_permalink_structure( '' );
+			flush_rewrite_rules();
+		}
+	}
+
+	public function test_bug_condition_enclosure_url_is_not_site_root_without_permalink(): void {
+		$post_id = $this->episode();
+		add_filter( 'post_link', '__return_false' );
+		try {
+			$url = (string) $this->xml()->channel->item[0]->enclosure->attributes()['url'];
+
+			$this->assertSame( AudioDelivery::url( $post_id, $this->mp3_id ), $url );
+			$this->assertStringStartsNotWith( home_url( '/?' ), $url );
+			$this->assertStringStartsWith( home_url( '/index.php' ), $url );
+		} finally {
+			remove_filter( 'post_link', '__return_false' );
+		}
+	}
+
 	public function test_pub_date_is_rfc_2822(): void {
 		$this->episode(
 			array(

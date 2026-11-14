@@ -4,7 +4,7 @@ Tags: podcast, rss, audio, mp3, mcp
 Requires at least: 6.4
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 0.7.0
+Stable tag: 0.8.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -66,7 +66,16 @@ No. La desinstalación elimina las opciones y la tabla de registros del plugin; 
 
 La ruta de entrega del plugin admite HEAD y rangos simples de bytes. Los archivos originales y las redirecciones a almacenamiento externo dependen del servidor que los sirve.
 
+= El enlace del audio (enclosure) devuelve HTML en lugar del MP3. ¿Qué hago? =
+
+La URL del audio usa el parámetro `lb_sp_audio` (por ejemplo `https://ejemplo.com/mi-entrada/?lb_sp_audio=123&lb_sp_attachment=456`). El plugin pide no cachear esa respuesta (`DONOTCACHEPAGE` y cabeceras `Cache-Control`), pero algunas cachés de página del hosting o de un CDN lo ignoran y sirven la página HTML de la entrada. En ese caso, excluye de la caché de página las URL que contengan el parámetro `lb_sp_audio`, desde el panel del hosting o del plugin de caché. Después purga la caché y comprueba con `curl -I <url>` que la respuesta es `audio/mpeg`.
+
 == Changelog ==
+
+= 0.8.0 =
+* Excluye las URL de audio de las cachés de forma temprana para que no se sirva HTML en lugar del archivo.
+* La URL de entrega del audio usa un respaldo con index.php.
+* Agrega una nota en la FAQ sobre cachés que sirven HTML.
 
 = 0.7.0 =
 * Corrige la URL del reproductor para entregar audio desde el permalink del episodio, incluso con una portada estática.

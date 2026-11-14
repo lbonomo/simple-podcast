@@ -24,6 +24,7 @@ final class AudioDelivery {
 	public function register(): void {
 		add_filter( 'query_vars', array( $this, 'query_vars' ) );
 		add_filter( 'exit_on_http_head', array( $this, 'allow_head' ) );
+		add_action( 'init', array( $this, 'early_nocache' ), 0 );
 		add_action( 'template_redirect', array( $this, 'serve' ), 0 );
 		add_action( 'admin_notices', array( $this, 'notice' ) );
 	}
@@ -49,6 +50,42 @@ final class AudioDelivery {
 		return isset( $_GET[ self::QUERY_POST ] ) ? false : $should_exit; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	}
 
+	/** Excluye de las cachés las solicitudes de audio antes de cualquier salida. */
+	public function early_nocache(): void {
+		if ( ! isset( $_GET[ self::QUERY_POST ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			return;
+		}
+		foreach ( array( 'DONOTCACHEPAGE', 'DONOTCACHEOBJECT', 'DONOTCACHEDB' ) as $constant ) {
+			if ( ! defined( $constant ) ) {
+				define( $constant, true ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.VariableConstantNameFound -- Constantes estándar de plugins de caché.
+			}
+		}
+		$this->send_cache_headers();
+		do_action( 'litespeed_control_set_nocache', 'lb-simple-podcast audio' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Hook de LiteSpeed Cache.
+	}
+
+	/** Envía las cabeceras de exclusión de caché si todavía es posible. */
+	private function send_cache_headers(): void {
+		if ( headers_sent() ) {
+			return;
+		}
+		$headers = apply_filters(
+			'lb_sp_audio_nocache_headers',
+			array(
+				'Cache-Control'             => 'private, no-store, no-cache, must-revalidate, max-age=0',
+				'X-LiteSpeed-Cache-Control' => 'no-cache',
+			)
+		);
+		if ( ! is_array( $headers ) ) {
+			return;
+		}
+		foreach ( $headers as $name => $value ) {
+			if ( is_string( $name ) && is_string( $value ) ) {
+				header( $name . ': ' . $value );
+			}
+		}
+	}
+
 	/**
 	 * Obtiene la URL de entrega.
 	 *
@@ -56,12 +93,16 @@ final class AudioDelivery {
 	 * @param int $attachment_id Attachment.
 	 */
 	public static function url( int $post_id, int $attachment_id ): string {
+		$base = get_permalink( $post_id );
+		if ( ! is_string( $base ) || '' === $base ) {
+			$base = home_url( '/index.php' );
+		}
 		return add_query_arg(
 			array(
 				self::QUERY_POST       => $post_id,
 				self::QUERY_ATTACHMENT => $attachment_id,
 			),
-			get_permalink( $post_id )
+			$base
 		);
 	}
 
@@ -94,6 +135,7 @@ final class AudioDelivery {
 		status_header( $response['status'] );
 		nocache_headers();
 		header( 'Cache-Control: private, no-store, no-cache, must-revalidate, max-age=0' );
+		$this->send_cache_headers();
 		header( 'X-Content-Type-Options: nosniff' );
 		foreach ( $response['headers'] as $name => $header ) {
 			header( $name . ': ' . $header );
