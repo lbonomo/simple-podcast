@@ -61,7 +61,7 @@ final class AudioDelivery {
 				self::QUERY_POST       => $post_id,
 				self::QUERY_ATTACHMENT => $attachment_id,
 			),
-			home_url( '/' )
+			get_permalink( $post_id )
 		);
 	}
 

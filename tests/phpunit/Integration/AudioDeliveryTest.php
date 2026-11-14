@@ -30,6 +30,27 @@ final class AudioDeliveryTest extends WP_UnitTestCase {
 		update_post_meta( $this->post_id, AudioMeta::META_KEY, $this->attachment_id );
 	}
 
+	public function test_delivery_url_uses_episode_permalink_with_static_front_page(): void {
+		$front_page_id = self::factory()->post->create(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+			)
+		);
+		update_option( 'show_on_front', 'page' );
+		update_option( 'page_on_front', $front_page_id );
+
+		$expected = add_query_arg(
+			array(
+				AudioDelivery::QUERY_POST       => $this->post_id,
+				AudioDelivery::QUERY_ATTACHMENT => $this->attachment_id,
+			),
+			get_permalink( $this->post_id )
+		);
+
+		$this->assertSame( $expected, AudioDelivery::url( $this->post_id, $this->attachment_id ) );
+	}
+
 	public function test_ranges_and_head(): void {
 		$delivery = new AudioDelivery();
 		$full     = $delivery->response( $this->post_id, $this->attachment_id, array( 'REQUEST_METHOD' => 'GET' ) );
