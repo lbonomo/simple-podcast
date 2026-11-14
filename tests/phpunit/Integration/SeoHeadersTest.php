@@ -11,6 +11,7 @@ namespace LbSimplePodcast\Tests\Integration;
 
 use LbSimplePodcast\Integrations\SeoHeaders;
 use LbSimplePodcast\Meta\AudioMeta;
+use LbSimplePodcast\Media\AudioDelivery;
 use WP_UnitTestCase;
 
 /**
@@ -62,8 +63,9 @@ final class SeoHeadersTest extends WP_UnitTestCase {
 	}
 
 	public function test_post_with_audio_outputs_open_graph(): void {
-		$head = $this->head_for( $this->post_with_audio() );
-		$url  = wp_get_attachment_url( $this->mp3_id );
+		$post_id = $this->post_with_audio();
+		$head    = $this->head_for( $post_id );
+		$url     = AudioDelivery::url( $post_id, $this->mp3_id );
 
 		$this->assertStringContainsString( '<meta property="og:audio" content="' . esc_url( $url ) . '" />', $head );
 		$this->assertStringContainsString( '<meta property="og:audio:type" content="audio/mpeg" />', $head );
@@ -77,7 +79,7 @@ final class SeoHeadersTest extends WP_UnitTestCase {
 
 		$this->assertSame( 'https://schema.org', $data['@context'] );
 		$this->assertSame( 'AudioObject', $data['@type'] );
-		$this->assertSame( wp_get_attachment_url( $this->mp3_id ), $data['contentUrl'] );
+		$this->assertSame( AudioDelivery::url( $post_id, $this->mp3_id ), $data['contentUrl'] );
 		$this->assertSame( 'audio/mpeg', $data['encodingFormat'] );
 		$this->assertMatchesRegularExpression( '/^PT(\d+M)?\d+S$/', $data['duration'] );
 		$this->assertSame( 'Ep 1 & más', $data['name'] );

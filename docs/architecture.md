@@ -20,7 +20,39 @@ flowchart LR
   Settings[Ajustes > Podcast] --> Feed
 ```
 
-La única fuente de verdad del audio es el meta `_lb_sp_audio_id` (ID de un attachment `audio/mpeg`). Todo lo demás (URL, tamaño, duración) se deriva del attachment, por lo que no puede desincronizarse.
+La fuente de verdad del audio es el meta `_lb_sp_audio_id` (ID de un attachment `audio/mpeg`). El tamaño y la duración se derivan del attachment; la URL pública del plugin pasa por la ruta de entrega y registro descrita abajo.
+
+## Entrega y registro de solicitudes
+
+La URL `/?lb_sp_audio=ID_ENTRADA&lb_sp_attachment=ID_ATTACHMENT` sirve el audio asociado actualmente. El reproductor, el feed, REST, SEO y MCP utilizan esa URL. Se admiten GET y HEAD, rangos simples y respuestas 200, 206 y 416; se ignoran rangos múltiples, inválidos o con `If-Range`, y las solicitudes condicionales se responden con el archivo completo. La respuesta prohíbe la caché, pero los intermediarios ajenos podrían ignorar esa instrucción. La entrega local transmite bloques desde PHP.
+
+Las entradas publicadas sin contraseña son públicas. Para otros estados se comprueba `read_post` y, si corresponde, la contraseña. Una URL antigua deja de funcionar cuando cambia el attachment. No es DRM: cualquier cliente que recibe audio puede guardarlo.
+
+Por defecto se sirve el archivo original local. Opcionalmente, un administrador puede definir `LB_SP_PRIVATE_AUDIO_DIR` en `wp-config.php` con un directorio ya existente y escribible, accesible a PHP y situado fuera de `ABSPATH`, del directorio de uploads y del `DOCUMENT_ROOT`. Se crean allí copias con nombre `lb-sp-{id-sitio}-{id-attachment}-{hash}.mp3` y permisos 0600. Para detectar cambios se calcula SHA-256 del original y de la copia en cada solicitud; esto aumenta la carga de E/S para archivos grandes. Verificar también que ninguna configuración del servidor, alias, CDN o montaje lo exponga: el plugin no puede detectar todas esas configuraciones. Las copias se conservan al reemplazar y desinstalar; un administrador puede identificarlas y eliminarlas manualmente después de comprobar que ya no las necesita.
+
+El filtro `lb_sp_private_audio_dir` permite especificar el mismo directorio desde código; se aplican las mismas comprobaciones.
+
+Si no puede crearse una copia, se sirve el original local y se muestra un aviso. Sin archivo local legible, se redirige a la URL del attachment si es válida y se muestra un aviso. **Los originales públicos, enlaces antiguos, redirecciones, cachés y copias externas pueden eludir la ruta y el registro**. Una solicitud registrada no equivale a una escucha o descarga completa; los reproductores suelen realizar varias solicitudes.
+
+### Tabla SQL
+
+`{prefix}lb_sp_audio_requests` es independiente para cada sitio. Se crea y actualiza mediante `dbDelta` en `init`, con la versión en la opción `lb_sp_log_schema_version`. La instalación invalida el cuerpo y la versión del feed. La tabla usa el charset/collation del sitio. Al desinstalar se elimina junto con las opciones de estado; no se eliminan attachments, metadatos de entradas ni copias.
+
+| Columna | Tipo | Contenido |
+| --- | --- | --- |
+| `id` | `bigint unsigned`, clave primaria | Identificador autoincremental. |
+| `requested_at` | `datetime` | Momento de la solicitud, UTC. |
+| `post_id`, `attachment_id` | `bigint unsigned` | IDs recibidos para la entrada y el attachment; cero si faltan. |
+| `user_id` | `bigint unsigned` | ID de usuario conectado, o cero. |
+| `method` | `varchar(32)` | Método HTTP, limitado a 32 bytes. |
+| `remote_addr` | `varchar(45)` | IP del interlocutor visto por PHP, limitada a 45 bytes; puede ser un proxy. |
+| `request_url` | `longtext` | URL reconstruida con esquema, host y URI recibida, incluida la cadena de consulta. |
+| `headers` | `longtext` | Objeto JSON con las cabeceras que el servidor proporciona a PHP; bytes UTF-8 inválidos se sustituyen. |
+| `status` | `smallint unsigned` | Código HTTP previsto de la respuesta. |
+
+Índices: `requested_at`, `(post_id, requested_at)` y `(attachment_id, requested_at)`. Se guarda una fila por solicitud que llega a la ruta, incluso HEAD, errores, rangos y redirecciones, sin deduplicación. Los datos no disponibles en PHP no se pueden recuperar; no se capturan huellas TLS JA3/JA4. Si falla la inserción se continúa la entrega y se muestra un aviso administrativo.
+
+**Datos sensibles:** se guardan deliberadamente todas las cabeceras disponibles y la URL completa, incluidas posibles cookies, credenciales, tokens y datos personales, sin límite temporal ni limpieza automática. Restringir el acceso a la base, sus copias de seguridad y registros de errores; evaluar obligaciones legales y de privacidad antes de activar el plugin. El volumen de datos puede crecer rápidamente. Esta etapa no incluye consentimiento, pantalla de consulta, exportación ni borrado individual.
 
 ## Componentes
 
@@ -99,5 +131,5 @@ El CSS (`assets/css/player.css`) se registra siempre pero se encola solo al rend
 ## Limitaciones conocidas
 - Una sola categoría de Apple (sin subcategorías).
 - Imagen del canal: JPG/PNG cuadrada de 1400 a 3000 px (validación por metadatos de WordPress).
-- La compatibilidad HEAD/byte-range de los archivos MP3 depende del servidor web, no del plugin.
+- La protección del archivo original y de copias externas depende del servidor y no está garantizada por el plugin.
 - La matriz de CI usa la última versión de WordPress; las versiones antiguas (6.4–6.8) no se probaron.

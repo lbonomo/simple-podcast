@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace LbSimplePodcast\Tests\Integration;
 
 use LbSimplePodcast\Meta\AudioMeta;
+use LbSimplePodcast\Media\AudioDelivery;
 use WP_REST_Request;
 use WP_REST_Server;
 use WP_UnitTestCase;
@@ -102,7 +103,7 @@ final class PostMetaTest extends WP_UnitTestCase {
 		$audio    = $response->get_data()['audio_data'];
 
 		$this->assertSame( $this->mp3_id, $audio['attachment_id'] );
-		$this->assertSame( wp_get_attachment_url( $this->mp3_id ), $audio['url'] );
+		$this->assertSame( AudioDelivery::url( $post_id, $this->mp3_id ), $audio['url'] );
 		$this->assertSame( 'audio/mpeg', $audio['mime_type'] );
 		$this->assertSame( filesize( dirname( __DIR__ ) . '/fixtures/sample.mp3' ), $audio['filesize'] );
 		$this->assertGreaterThanOrEqual( 1, $audio['duration'] );

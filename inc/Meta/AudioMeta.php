@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace LbSimplePodcast\Meta;
 
 use LbSimplePodcast\Media\AudioValidator;
+use LbSimplePodcast\Media\AudioDelivery;
 use stdClass;
 use WP_Error;
 use WP_Post;
@@ -227,7 +228,7 @@ final class AudioMeta {
 
 		return array(
 			'attachment_id' => $attachment_id,
-			'url'           => $url,
+			'url'           => AudioDelivery::url( $post_id, $attachment_id ),
 			'mime_type'     => AudioValidator::MIME_TYPE,
 			'filesize'      => $filesize,
 			'duration'      => $duration,

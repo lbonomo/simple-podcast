@@ -11,6 +11,7 @@ namespace LbSimplePodcast\Tests\Integration;
 
 use LbSimplePodcast\Frontend\PlayerInjector;
 use LbSimplePodcast\Meta\AudioMeta;
+use LbSimplePodcast\Media\AudioDelivery;
 use WP_UnitTestCase;
 
 /**
@@ -63,11 +64,12 @@ final class PlayerInjectorTest extends WP_UnitTestCase {
 	}
 
 	public function test_player_is_injected_before_the_content(): void {
-		$html = $this->content_in_loop( $this->post_with_audio() );
+		$post_id = $this->post_with_audio();
+		$html    = $this->content_in_loop( $post_id );
 
 		$this->assertStringContainsString( 'class="lb-sp-player"', $html );
 		$this->assertStringContainsString( 'class="lb-sp-player__audio"', $html );
-		$this->assertStringContainsString( 'src="' . esc_url( wp_get_attachment_url( $this->mp3_id ) ) . '"', $html );
+		$this->assertStringContainsString( 'src="' . esc_url( AudioDelivery::url( $post_id, $this->mp3_id ) ) . '"', $html );
 		$this->assertLessThan( strpos( $html, 'Cuerpo del post.' ), strpos( $html, 'lb-sp-player' ) );
 	}
 
