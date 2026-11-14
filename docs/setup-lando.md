@@ -17,6 +17,16 @@ npm run env:start
 
 Al terminar la inicialización, abre `http://localhost:8888` e inicia sesión con `admin` / `password`. `wp-env` monta y activa el plugin de esta carpeta.
 
+### Test E2E de publicación
+
+Con `wp-env` iniciado, ejecuta desde esta carpeta:
+
+```bash
+WP_BASE_URL=http://localhost:8888 npm run test:e2e
+```
+
+La prueba usa Gutenberg para crear y publicar una entrada, subir `tests/audios/demo.mp3` y asociarlo desde el panel **Podcast (audio MP3)**. Después verifica el reproductor en la entrada pública y el episodio en `/?feed=podcast`. Cada ejecución deja la entrada y el archivo de prueba publicados en el entorno local.
+
 ### Listar registros de audio
 
 Con wp-env iniciado, ejecuta desde esta carpeta:
