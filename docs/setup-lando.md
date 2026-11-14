@@ -17,6 +17,17 @@ npm run env:start
 
 Al terminar la inicialización, abre `http://localhost:8888` e inicia sesión con `admin` / `password`. `wp-env` monta y activa el plugin de esta carpeta.
 
+### Listar registros de audio
+
+Con wp-env iniciado, ejecuta desde esta carpeta:
+
+```bash
+npm run logs        # últimos 50 registros
+npm run logs -- 10  # últimos 10 registros
+```
+
+Consulta la tabla SQL del sitio de desarrollo, sin modificarla, y muestra primero los registros más recientes: ID, fecha UTC, entrada, attachment, usuario, método, IP y estado HTTP. No muestra cabeceras ni URL completas para evitar imprimir posibles credenciales. No consulta `debug.log` ni los logs de Docker.
+
 ## Requisitos
 - Lando, Docker, Composer y Node.js (para compilar los assets).
 - PHP del contenedor: 8.2. WordPress 7.1 (la ability MCP necesita ≥ 6.9) y el plugin `mcp-adapter` para probar la tool.
