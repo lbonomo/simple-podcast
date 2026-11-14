@@ -30,7 +30,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '24'
+          node-version: '26'
           cache: npm
       - run: npm ci
       - run: npm test
@@ -77,7 +77,7 @@ jobs:
       - name: Compilar assets (los usa el test de encolado)
         uses: actions/setup-node@v4
         with:
-          node-version: '24'
+          node-version: '26'
           cache: npm
       - run: npm ci && npm run build
       - run: vendor/bin/phpunit
@@ -94,7 +94,7 @@ jobs:
           coverage: none
       - uses: actions/setup-node@v4
         with:
-          node-version: '24'
+          node-version: '26'
           cache: npm
       - run: npm ci
       - run: composer install --no-interaction --no-progress

@@ -6,6 +6,17 @@ El plugin vive en `plugins/simple-podcast/` y el sitio Lando (`name: plugins`, `
 
 Todos los comandos `lando` se ejecutan desde `../../server/`.
 
+## Entorno alternativo con wp-env
+
+También se puede iniciar un WordPress local con `wp-env` desde esta carpeta. Requiere Docker en ejecución:
+
+```bash
+npm ci
+npm run env:start
+```
+
+Al terminar la inicialización, abre `http://localhost:8888` e inicia sesión con `admin` / `password`. `wp-env` monta y activa el plugin de esta carpeta.
+
 ## Requisitos
 - Lando, Docker, Composer y Node.js (para compilar los assets).
 - PHP del contenedor: 8.2. WordPress 7.1 (la ability MCP necesita ≥ 6.9) y el plugin `mcp-adapter` para probar la tool.
