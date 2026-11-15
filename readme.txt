@@ -4,7 +4,7 @@ Tags: podcast, rss, audio, mp3, mcp
 Requires at least: 6.4
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 0.9.0
+Stable tag: 1.0.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -12,7 +12,7 @@ Asocia un MP3 a cada entrada y publica un feed RSS de podcast compatible con App
 
 == Description ==
 
-Las solicitudes a los audios se registran automáticamente, incluyendo la IP observada, la URL completa y todas las cabeceras disponibles. Pueden contener cookies, tokens, credenciales y datos personales y se conservan sin límite hasta desinstalar. Consulte la documentación de arquitectura y evalúe las obligaciones de privacidad antes de usarlo. Los archivos originales públicos y cachés externas pueden seguir siendo accesibles sin pasar por el registro.
+Las solicitudes válidas a los audios se registran automáticamente, incluyendo la IP observada, la URL completa y las cabeceras recibidas (acotadas en tamaño). Pueden contener cookies, tokens, credenciales y datos personales y se conservan 90 días por defecto (filtro `lb_sp_log_retention_days`). Consulte la documentación de arquitectura y evalúe las obligaciones de privacidad antes de usarlo. Los archivos originales públicos y cachés externas pueden seguir siendo accesibles sin pasar por el registro.
 
 LB Simple Podcast convierte tus entradas en episodios de podcast sin instalar un sistema aparte.
 
@@ -72,6 +72,14 @@ La ruta de entrega del plugin admite HEAD y rangos simples de bytes. Los archivo
 La URL del audio usa el parámetro `lb_sp_audio` (por ejemplo `https://ejemplo.com/mi-entrada/?lb_sp_audio=123&lb_sp_attachment=456`). El plugin pide no cachear esa respuesta (`DONOTCACHEPAGE` y cabeceras `Cache-Control`), pero algunas cachés de página del hosting o de un CDN lo ignoran y sirven la página HTML de la entrada. En ese caso, excluye de la caché de página las URL que contengan el parámetro `lb_sp_audio`, desde el panel del hosting o del plugin de caché. Después purga la caché y comprueba con `curl -I <url>` que la respuesta es `audio/mpeg`.
 
 == Changelog ==
+= 1.0.0 =
+* Seguridad: todo el menú Podcast (Dashboard, Setup y Logs) y el guardado de ajustes quedan restringidos a administradores; las pantallas responden 403 al resto de usuarios.
+* Seguridad: límite de solicitudes por IP en la entrega de audio (120 por minuto por defecto, respuesta 429 con Retry-After). Filtros `lb_sp_throttle_limit` y `lb_sp_throttle_window`.
+* Solo se registran en la base de datos las solicitudes a enlaces de audio válidos; la URL y las cabeceras guardadas tienen tope de tamaño.
+* Purga diaria automática de registros con más de 90 días (filtro `lb_sp_log_retention_days`).
+* IP del cliente detrás de proxies: constantes `LB_SP_TRUSTED_PROXIES` y `LB_SP_PROXY_HEADER`, y anonimización opcional con `LB_SP_ANONYMIZE_IP`.
+* Nuevo registro de errores en Podcast > Setup, con fecha, origen y motivo, y con opción de marcar como leído. El aviso de administración solo aparece con errores sin leer.
+
 = 0.9.0 =
 * Nuevo menú Podcast con Dashboard (estadísticas), Setup (ajustes del canal, antes en Ajustes > Podcast) y Logs (tabla paginada de solicitudes de audio con detalles desplegables).
 * Agrega el enlace "Configuración" en la fila del plugin de la página Plugins.
