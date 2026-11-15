@@ -30,7 +30,7 @@ for required in \
 done
 
 # Nada de desarrollo (ni en la raíz ni dentro de vendor/).
-forbidden='^'"${SLUG}"'/(tests|docs|node_modules|bin|build|\.github|assets/src)/|^'"${SLUG}"'/(composer\.(json|lock)|package(-lock)?\.json|phpunit\.xml\.dist|phpstan\.neon\.dist|phpcs\.xml\.dist|jest\.config\.js|\.gitignore|\.distignore|\.lando\.yml)$'
+forbidden='^'"${SLUG}"'/(tests|docs|node_modules|bin|build|scripts|\.github|assets/src)/|^'"${SLUG}"'/(composer\.(json|lock)|package(-lock)?\.json|phpunit\.xml\.dist|phpstan\.neon\.dist|phpcs\.xml\.dist|jest\.config\.js|\.gitignore|\.distignore|\.lando\.yml)$'
 if grep -Eq "${forbidden}" <<<"${LISTING}"; then
 	echo "SOBRA en el paquete:" >&2
 	grep -E "${forbidden}" <<<"${LISTING}" >&2

@@ -452,4 +452,10 @@ final class FeedOutputTest extends WP_UnitTestCase {
 		$this->assertSame( 304, $gzip['status'] );
 		$this->assertSame( 304, $weak['status'] );
 	}
+
+	public function test_generator_uses_the_plugin_version_constant(): void {
+		$this->episode();
+
+		$this->assertSame( 'LB Simple Podcast ' . LB_SP_VERSION, (string) $this->xml()->channel->generator );
+	}
 }
