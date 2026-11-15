@@ -56,12 +56,12 @@ Aplicado el 15/11/2026 con `gh api`:
 
 Reemplaza el aviso fijo basado en `lb_sp_log_error`.
 
-- [ ] Guardar cada error con más información: fecha (GMT), origen (inserción de solicitud, migración de tabla, entrega de audio), motivo (`$wpdb->last_error` o mensaje equivalente), `post_id` y `attachment_id` cuando existan. No guardar cabeceras ni cookies.
-- [ ] Persistir los errores en una opción con límite (por ejemplo, los últimos 50), sin autoload, o en una tabla propia si hace falta histórico.
-- [ ] Mostrar el registro de errores en la pantalla de Settings del plugin: fecha, origen, motivo y estado (nuevo o leído).
-- [ ] Permitir marcar un error como leído, todos como leídos, y vaciar el registro. Cada acción con nonce y comprobación de capacidad (ver T1).
-- [ ] El aviso del admin solo aparece si hay errores sin leer, con enlace a Settings y el número de pendientes. Desaparece al marcarlos como leídos.
-- [ ] Limpiar o resolver automáticamente el estado cuando `RequestLog::upgrade()` termina bien.
-- [ ] Escapar toda la salida (`esc_html`); los motivos pueden incluir texto de MySQL.
-- [ ] Migrar `lb_sp_log_error` a la nueva estructura y borrar las opciones nuevas en `uninstall.php`.
-- [ ] Tests: se registra un error con sus datos, se respeta el límite, marcar como leído oculta el aviso, y un usuario sin permiso no puede ejecutar las acciones.
+- [x] Guardar cada error con más información: fecha (GMT), origen (inserción de solicitud, migración de tabla, entrega de audio), motivo (`$wpdb->last_error` o mensaje equivalente), `post_id` y `attachment_id` cuando existan. No guardar cabeceras ni cookies.
+- [x] Persistir los errores en una opción con límite (por ejemplo, los últimos 50), sin autoload, o en una tabla propia si hace falta histórico.
+- [x] Mostrar el registro de errores en la pantalla de Settings del plugin: fecha, origen, motivo y estado (nuevo o leído).
+- [x] Permitir marcar un error como leído, todos como leídos, y vaciar el registro. Cada acción con nonce y comprobación de capacidad (ver T1).
+- [x] El aviso del admin solo aparece si hay errores sin leer, con enlace a Settings y el número de pendientes. Desaparece al marcarlos como leídos.
+- [x] Limpiar o resolver automáticamente el estado cuando `RequestLog::upgrade()` termina bien.
+- [x] Escapar toda la salida (`esc_html`); los motivos pueden incluir texto de MySQL.
+- [x] Migrar `lb_sp_log_error` a la nueva estructura y borrar las opciones nuevas en `uninstall.php`.
+- [x] Tests: se registra un error con sus datos, se respeta el límite, marcar como leído oculta el aviso, y un usuario sin permiso no puede ejecutar las acciones.

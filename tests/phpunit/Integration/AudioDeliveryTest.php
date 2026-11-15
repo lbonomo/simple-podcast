@@ -11,6 +11,7 @@ namespace LbSimplePodcast\Tests\Integration;
 
 use LbSimplePodcast\Media\AudioDelivery;
 use LbSimplePodcast\Meta\AudioMeta;
+use LbSimplePodcast\Tracking\ErrorLog;
 use LbSimplePodcast\Tracking\RequestLog;
 use WP_UnitTestCase;
 
@@ -326,12 +327,12 @@ final class AudioDeliveryTest extends WP_UnitTestCase {
 		add_filter( 'wp_get_attachment_url', $filter );
 		try {
 			foreach ( array( 'GET', 'HEAD' ) as $method ) {
-				delete_option( AudioDelivery::WARNING_OPTION );
+				( new ErrorLog() )->clear();
 				$result = ( new AudioDelivery() )->response( $this->post_id, $this->attachment_id, array( 'REQUEST_METHOD' => $method ) );
 				$this->assertSame( 302, $result['status'], $method );
 				$this->assertSame( 'https://example.test/episode.mp3', $result['redirect'] );
 				$this->assertSame( '', $result['path'] );
-				$this->assertSame( '1', get_option( AudioDelivery::WARNING_OPTION ) );
+				$this->assertSame( ErrorLog::SOURCE_DELIVERY, ( new ErrorLog() )->all()[0]['source'] );
 			}
 		} finally {
 			remove_filter( 'wp_get_attachment_url', $filter );
@@ -462,7 +463,13 @@ final class AudioDeliveryTest extends WP_UnitTestCase {
 		$previous = $wpdb->suppress_errors( true );
 		try {
 			$this->assertFalse( ( new RequestLog() )->record( $this->post_id, $this->attachment_id, 200, array(), array() ) );
-			$this->assertSame( '1', get_option( RequestLog::ERROR_OPTION ) );
+			$entries = ( new ErrorLog() )->all();
+			$this->assertCount( 1, $entries );
+			$this->assertSame( ErrorLog::SOURCE_LOG_INSERT, $entries[0]['source'] );
+			$this->assertSame( ErrorLog::LEVEL_ERROR, $entries[0]['level'] );
+			$this->assertSame( $this->post_id, $entries[0]['post_id'] );
+			$this->assertSame( $this->attachment_id, $entries[0]['attachment_id'] );
+			$this->assertSame( 1, ( new ErrorLog() )->unread_error_count() );
 		} finally {
 			remove_filter( 'query', $filter );
 			$wpdb->suppress_errors( $previous );
@@ -490,7 +497,7 @@ final class AudioDeliveryTest extends WP_UnitTestCase {
 			$result = ( new AudioDelivery() )->response( $this->post_id, $this->attachment_id, array() );
 			$this->assertSame( 302, $result['status'] );
 			$this->assertSame( 'https://example.test/episode.mp3', $result['redirect'] );
-			$this->assertSame( '1', get_option( AudioDelivery::WARNING_OPTION ) );
+			$this->assertSame( ErrorLog::SOURCE_DELIVERY, ( new ErrorLog() )->all()[0]['source'] );
 		} finally {
 			remove_filter( 'wp_get_attachment_url', $filter );
 			update_post_meta( $this->attachment_id, '_wp_attached_file', $original );

@@ -23,6 +23,8 @@ $lb_sp_cleanup = static function (): void {
 	delete_option( 'lb_sp_log_schema_version' );
 	delete_option( 'lb_sp_log_error' );
 	delete_option( 'lb_sp_storage_warning' );
+	delete_option( 'lb_sp_errors' );
+	delete_option( 'lb_sp_errors_version' );
 	delete_transient( 'lb_sp_feed_body' );
 };
 

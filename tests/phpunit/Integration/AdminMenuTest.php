@@ -280,22 +280,6 @@ final class AdminMenuTest extends WP_UnitTestCase {
 		$this->assertSame( 'manage_options', apply_filters( 'option_page_capability_' . SettingsPage::GROUP, 'edit_posts' ) );
 	}
 
-	public function test_log_error_notice_is_shown_to_admins_only(): void {
-		update_option( RequestLog::ERROR_OPTION, '1', false );
-		$log = new RequestLog();
-
-		wp_set_current_user( self::factory()->user->create( array( 'role' => 'editor' ) ) );
-		ob_start();
-		$log->notice();
-		$this->assertSame( '', ob_get_clean() );
-
-		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
-		ob_start();
-		$log->notice();
-		$this->assertStringContainsString( 'notice-error', (string) ob_get_clean() );
-		delete_option( RequestLog::ERROR_OPTION );
-	}
-
 	public function test_logs_page_without_rows(): void {
 		$html = $this->output( array( new LogsPage(), 'render' ) );
 		$this->assertStringContainsString( 'Sin solicitudes registradas', $html );

@@ -355,6 +355,7 @@ final class SettingsPage {
 				</table>
 				<?php submit_button(); ?>
 			</form>
+			<?php ( new ErrorsPanel() )->render(); ?>
 		</div>
 		<?php
 	}

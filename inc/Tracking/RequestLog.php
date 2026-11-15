@@ -9,7 +9,6 @@ declare(strict_types=1);
 
 namespace LbSimplePodcast\Tracking;
 
-use LbSimplePodcast\Admin\Menu;
 use LbSimplePodcast\Feed\FeedVersion;
 
 /** Almacena las solicitudes mediante una tabla por sitio. */
@@ -17,7 +16,6 @@ final class RequestLog {
 
 	public const VERSION        = '1';
 	public const VERSION_OPTION = 'lb_sp_log_schema_version';
-	public const ERROR_OPTION   = 'lb_sp_log_error';
 	public const CRON_HOOK      = 'lb_sp_purge_log';
 
 	public const DEFAULT_RETENTION_DAYS = 90;
@@ -32,7 +30,6 @@ final class RequestLog {
 		add_action( 'init', array( $this, 'upgrade' ), 1 );
 		add_action( 'init', array( $this, 'schedule_purge' ) );
 		add_action( self::CRON_HOOK, array( $this, 'run_purge' ) );
-		add_action( 'admin_notices', array( $this, 'notice' ) );
 	}
 
 	/** Programa la purga diaria si todavía no existe. */
@@ -134,15 +131,23 @@ final class RequestLog {
 				KEY attachment_requested (attachment_id,requested_at)
 			) $charset;"
 		);
-		$failed   = '' !== $wpdb->last_error;
+		$db_error = $wpdb->last_error;
+		$failed   = '' !== $db_error;
 		$found    = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $table ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		$columns  = $table === $found ? $wpdb->get_col( "SHOW COLUMNS FROM `$table`" ) : array(); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$required = array( 'id', 'requested_at', 'post_id', 'attachment_id', 'user_id', 'method', 'remote_addr', 'request_url', 'headers', 'status' );
 		if ( $failed || $table !== $found || array_diff( $required, $columns ) ) {
-			update_option( self::ERROR_OPTION, '1', false );
+			$errors = new ErrorLog();
+			$errors->add(
+				ErrorLog::SOURCE_LOG_SCHEMA,
+				'' !== $db_error
+					? sprintf( /* translators: %s: error de la base de datos. */ __( 'No se pudo crear o actualizar la tabla de registros: %s', 'lb-simple-podcast' ), $db_error )
+					: __( 'No se pudo crear o actualizar la tabla de registros (faltan la tabla o columnas).', 'lb-simple-podcast' )
+			);
 			return;
 		}
 		update_option( self::VERSION_OPTION, self::VERSION, false );
+		( new ErrorLog() )->mark_all_read( ErrorLog::SOURCE_LOG_SCHEMA );
 		FeedVersion::bump();
 	}
 
@@ -162,7 +167,7 @@ final class RequestLog {
 		$uri    = isset( $server['REQUEST_URI'] ) && is_string( $server['REQUEST_URI'] ) ? $server['REQUEST_URI'] : '';
 		$json   = wp_json_encode( $this->limit_headers( $headers ), JSON_INVALID_UTF8_SUBSTITUTE );
 		if ( false === $json ) {
-			update_option( self::ERROR_OPTION, '1', false );
+			( new ErrorLog() )->add( ErrorLog::SOURCE_LOG_INSERT, __( 'No se pudieron codificar las cabeceras de la solicitud.', 'lb-simple-podcast' ), ErrorLog::LEVEL_ERROR, $post_id, $attachment_id );
 			return false;
 		}
 		$result = $wpdb->insert( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
@@ -181,16 +186,17 @@ final class RequestLog {
 			array( '%s', '%d', '%d', '%d', '%s', '%s', '%s', '%s', '%d' )
 		);
 		if ( false === $result ) {
-			update_option( self::ERROR_OPTION, '1', false );
+			$reason = '' !== $wpdb->last_error ? $wpdb->last_error : __( 'error desconocido', 'lb-simple-podcast' );
+			( new ErrorLog() )->add(
+				ErrorLog::SOURCE_LOG_INSERT,
+				/* translators: %s: error de la base de datos. */
+				sprintf( __( 'No se pudo guardar una solicitud de audio: %s', 'lb-simple-podcast' ), $reason ),
+				ErrorLog::LEVEL_ERROR,
+				$post_id,
+				$attachment_id
+			);
 			return false;
 		}
 		return true;
-	}
-
-	/** Muestra un aviso de error a los administradores. */
-	public function notice(): void {
-		if ( current_user_can( Menu::CAPABILITY ) && get_option( self::ERROR_OPTION ) ) {
-			echo '<div class="notice notice-error"><p>' . esc_html__( 'Simple Podcast: no se pudo guardar una solicitud de audio. Revisa la base de datos.', 'lb-simple-podcast' ) . '</p></div>';
-		}
 	}
 }
