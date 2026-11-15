@@ -98,6 +98,7 @@ final class Plugin {
 			'editor_assets'  => new Admin\EditorAssets(),
 			'meta_box'       => new Admin\MetaBox(),
 			'settings_page'  => new Admin\SettingsPage(),
+			'menu'           => new Admin\Menu(),
 			'feed'           => new Feed\FeedRegistrar(),
 			'player'         => new Frontend\PlayerInjector(),
 			'seo_headers'    => new Integrations\SeoHeaders(),

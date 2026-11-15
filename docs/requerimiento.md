@@ -1,6 +1,6 @@
 # Documento de Requerimientos Técnicos y Arquitectura (PRD)
 
-> **Estado:** implementado. Este documento recoge los requerimientos corregidos con las decisiones de [init-plan.md](init-plan.md). El diseño final está en [architecture.md](architecture.md), la tool MCP en [mcp-tool-schema.md](mcp-tool-schema.md) y el entorno en [setup-lando.md](setup-lando.md).
+> **Estado:** implementado. Este documento recoge los requerimientos corregidos con las decisiones de [init-plan.md](init-plan.md). El diseño final está en [architecture.md](architecture.md), la tool MCP en [mcp-tool-schema.md](mcp-tool-schema.md) y el entorno en [setup.md](setup.md).
 >
 > **Cambios respecto a la versión original:** el plugin pasa a llamarse `lb-simple-podcast`; el meta es solo `_lb_sp_audio_id` (la URL se deriva); la integración MCP usa la Abilities API de WordPress (no existe `mcp_register_tool()`); se agregan ajustes del canal, anti-SSRF, límite de tamaño y reglas de caché del feed.
 
@@ -23,7 +23,7 @@
   ```json
   "audio_data": {
     "attachment_id": 123,
-    "url": "https://plugins.lndo.site/wp-content/uploads/track.mp3",
+    "url": "http://localhost:8888/wp-content/uploads/track.mp3",
     "mime_type": "audio/mpeg",
     "filesize": 15420310,
     "duration": 345
@@ -40,7 +40,7 @@
   * Inclusión de tags `<itunes:duration>`, `<itunes:explicit>`, `<itunes:summary>` y GUID persistente (`isPermaLink="false"`).
   * Cabecera HTTP `Content-Type: application/rss+xml; charset=UTF-8` con gestión correcta de cache `Last-Modified` y `ETag`, respuesta `304` a `If-None-Match` / `If-Modified-Since` e invalidación al publicar, editar, borrar o cambiar los ajustes.
   * Etiquetas de canal para Apple Podcasts: `title`, `description`, `language`, `itunes:image` (JPG/PNG cuadrada de 1400 a 3000 px), `itunes:category` (lista cerrada de Apple, capitalización exacta), `itunes:explicit`, `itunes:author`, `itunes:owner`, `itunes:type`. Fechas en RFC 2822 y entidades XML seguras (`&amp; &lt; &gt; &apos; &quot;`).
-  * Los datos del canal se configuran en una página propia: **Ajustes > Podcast** (opción `lb_sp_channel`), con valores por defecto tomados del sitio.
+  * Los datos del canal se configuran en una página propia: **Podcast > Setup** (opción `lb_sp_channel`), con valores por defecto tomados del sitio.
   * Los archivos de audio deben servirse con HEAD y byte-range (responsabilidad del servidor web).
 
 ### 2.3. SEO y Metadatos HTML (`wp_head`)
@@ -95,12 +95,15 @@ lb-simple-podcast/
 ├── docs/                            # Documentación técnica (no se distribuye)
 │   ├── architecture.md
 │   ├── mcp-tool-schema.md
-│   ├── setup-lando.md
+│   ├── setup.md
 │   ├── init-plan.md
 │   └── requerimiento.md
 ├── inc/
 │   ├── Admin/
+│   │   ├── DashboardPage.php        # Estadísticas generales
 │   │   ├── EditorAssets.php         # Script del sidebar de Gutenberg
+│   │   ├── LogsPage.php             # Tabla de solicitudes de audio
+│   │   ├── Menu.php                 # Menú Podcast (Dashboard, Setup, Logs)
 │   │   ├── MetaBox.php              # Respaldo para el editor clásico
 │   │   └── SettingsPage.php         # Ajustes del canal
 │   ├── Feed/
@@ -142,7 +145,7 @@ lb-simple-podcast/
 ## 4. Estrategia de Testing y Calidad
 
 1. **PHPUnit (WP Test Suite):**
-   * Pruebas de integración sobre una base de datos de test de WordPress (`wordpress_test`) levantada en Lando: `lando ssh -c "cd /app/wordpress/wp-content/plugins/simple-podcast && vendor/bin/phpunit"`.
+   * Pruebas de integración sobre una base de datos de test de WordPress (`wordpress_test`) levantada con wp-env: `npx wp-env run tests-cli --env-cwd=wp-content/plugins/simple-podcast vendor/bin/phpunit`.
    * Tests específicos:
      * El feed solo muestra posts con audio válido y responde con HTTP 200 y `Content-Type: application/rss+xml`.
      * Archivos que no sean `audio/mpeg` son rechazados al intentar guardarse en el meta.
@@ -172,25 +175,25 @@ bin/build-zip.sh
 bin/verify-zip.sh lb-simple-podcast.zip
 ```
 
-## 6. Procedimiento de Pruebas en Servidor Local (Lando)
+## 6. Procedimiento de Pruebas en Servidor Local (wp-env)
 
 Comandos para inicializar, verificar y probar en el entorno:
 
 1. **Flush de Rewrite Rules:**
    ```bash
-   lando wp rewrite flush --hard
+   npx wp-env run cli wp rewrite flush --hard
    ```
 2. **Verificación de Feed vía CLI:**
    ```bash
-   curl -k -I https://plugins.lndo.site/feed/podcast
-   curl -k -s https://plugins.lndo.site/feed/podcast | head -n 25
+   curl -I http://localhost:8888/feed/podcast
+   curl -s http://localhost:8888/feed/podcast | head -n 25
    ```
 3. **Prueba de Autenticación con Application Password:**
    ```bash
-   curl -k -X GET "https://plugins.lndo.site/wp-json/wp/v2/posts?_fields=id,audio_data" \
-     -u "admin:jvaM IUGN Qg6k fnyI ImMA r6Zd"
+   curl -X GET "http://localhost:8888/wp-json/wp/v2/posts?_fields=id,audio_data" \
+     -u "usuario:application password"
    ```
 4. **Ejecución de Tests en el Contenedor:**
    ```bash
-   lando ssh -c "cd /app/wordpress/wp-content/plugins/simple-podcast && vendor/bin/phpunit"
+   npx wp-env run tests-cli --env-cwd=wp-content/plugins/simple-podcast vendor/bin/phpunit
    ```

@@ -1,6 +1,6 @@
 # Plan de implementación: lb-simple-podcast
 
-Directorio: `/home/lbonomo/proyectos/wordpress/plugins/simple-podcast` (montado por Lando en `wp-content/plugins/simple-podcast`).
+Directorio: `/home/lbonomo/proyectos/wordpress/plugins/simple-podcast` (montado por wp-env en `wp-content/plugins/simple-podcast`).
 
 ## Problema
 
@@ -11,7 +11,7 @@ Extender el post type `post` con un MP3 asociado, generar un feed RSS válido pa
 - Slug, text domain y archivo principal: `lb-simple-podcast`. Namespace PHP: `LbSimplePodcast`. Prefijo de meta, opciones y funciones: `lb_sp_`.
 - Los datos del canal van en una página de Settings propia.
 - La ability soporta `audio_url` y `audio_base64`. Tamaño máximo: el que permita PHP (`min( wp_max_upload_size(), estimación por memory_limit )`).
-- Entorno Lando según el documento (el `.lando.yml` vive en `../server`). Las credenciales locales de test (Application Password en requerimiento.md) se dejan como están.
+- Entorno local con wp-env.
 - Idioma de la documentación y respuestas: español.
 
 ## Correcciones al documento original
@@ -24,7 +24,7 @@ Extender el post type `post` con un MP3 asociado, generar un feed RSS válido pa
 - La query del feed usa `meta_query` con `compare '>'`, `value 0`, `type NUMERIC`.
 - El feed se registra con `add_feed( 'podcast', ... )`.
 - Para `audio_base64` se estima el tamaño (`strlen * 3/4`) antes de decodificar y se rechaza si supera el límite. La decodificación es estricta.
-- Seguridad SSRF para `audio_url`: `wp_http_validate_url` + `reject_unsafe_urls`, solo http/https, con timeout y tope de tamaño. En Lando local se permite un filtro de allowlist para pruebas.
+- Seguridad SSRF para `audio_url`: `wp_http_validate_url` + `reject_unsafe_urls`, solo http/https, con timeout y tope de tamaño. En el entorno local se permite un filtro de allowlist para pruebas.
 - El build corre `composer install --no-dev`. `vendor/` queda incluido en el zip.
 - Se usa `@wordpress/scripts` para los assets, y se quita `webpack.config.js` del `.distignore`.
 
@@ -80,10 +80,10 @@ lb-simple-podcast/
 
 ## Tareas
 
-### Task 1: Scaffolding, tooling y entorno Lando
+### Task 1: Scaffolding, tooling y entorno local
 - Objetivo: esqueleto del plugin con autoload PSR-4, bootstrap `Plugin.php`, entrypoint, `composer.json`, `phpunit.xml.dist`, `phpstan.neon.dist` (nivel 8 con `szepeviktor/phpstan-wordpress`), `phpcs.xml.dist` (WordPress-Core/Extra/Docs), `.gitignore` y `.distignore`.
 - Tests: test de humo que verifica que el plugin se carga y que `Plugin` se inicializa.
-- Demo: el plugin se activa en Lando sin errores, y phpunit, phpstan y phpcs pasan.
+- Demo: el plugin se activa en el entorno local sin errores, y phpunit, phpstan y phpcs pasan.
 
 ### Task 2: Validador de audio
 - Objetivo: `AudioValidator` comprueba el mime real con `wp_check_filetype_and_ext` (solo `audio/mpeg`), tamaño máximo (límite de PHP) y duración con `wp_read_audio_metadata()`. Devuelve `WP_Error` con códigos claros.
@@ -122,4 +122,4 @@ lb-simple-podcast/
 - Tests: el zip no contiene `tests/`, `docs/` ni `node_modules/`.
 
 ### Task 11: Documentación y verificación final
-- Objetivo: `docs/` (arquitectura, esquema de la ability, setup Lando), `readme.txt`, y corrección de `requerimiento.md` con las decisiones de este plan.
+- Objetivo: `docs/` (arquitectura, esquema de la ability, setup), `readme.txt`, y corrección de `requerimiento.md` con las decisiones de este plan.

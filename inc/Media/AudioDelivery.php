@@ -26,7 +26,6 @@ final class AudioDelivery {
 		add_filter( 'exit_on_http_head', array( $this, 'allow_head' ) );
 		add_action( 'init', array( $this, 'early_nocache' ), 0 );
 		add_action( 'template_redirect', array( $this, 'serve' ), 0 );
-		add_action( 'admin_notices', array( $this, 'notice' ) );
 	}
 
 	/**
@@ -312,15 +311,5 @@ final class AudioDelivery {
 	 */
 	private function inside( string $path, string $base ): bool {
 		return $path === $base || str_starts_with( $path . '/', rtrim( $base, '/' ) . '/' );
-	}
-
-	/** Advierte de la protección incompleta. */
-	public function notice(): void {
-		if ( current_user_can( 'manage_options' ) ) {
-			echo '<div class="notice notice-warning"><p>' . esc_html__( 'Simple Podcast: la protección del audio es incompleta; los archivos originales o externos pueden ser accesibles sin registrar las solicitudes.', 'lb-simple-podcast' ) . '</p></div>';
-			if ( get_option( self::WARNING_OPTION ) ) {
-				echo '<div class="notice notice-warning"><p>' . esc_html__( 'Simple Podcast: no se pudo garantizar el almacenamiento protegido o leer un archivo de audio; revisa la configuración y los permisos.', 'lb-simple-podcast' ) . '</p></div>';
-			}
-		}
 	}
 }

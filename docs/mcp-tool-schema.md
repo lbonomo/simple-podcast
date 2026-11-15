@@ -31,13 +31,13 @@ Se rechazan propiedades desconocidas (`additionalProperties: false`). Hay que en
 {
   "post_id": 32,
   "attachment_id": 34,
-  "url": "https://plugins.lndo.site/wp-content/uploads/2026/11/mcp.mp3",
+  "url": "http://localhost:8888/wp-content/uploads/2026/11/mcp.mp3",
   "mime_type": "audio/mpeg",
   "filesize": 16571,
   "duration": 2,
   "replaced_attachment_id": 33,
-  "permalink": "https://plugins.lndo.site/2026/11/11/episodio-demo-prueba/",
-  "feed_url": "https://plugins.lndo.site/feed/podcast/"
+  "permalink": "http://localhost:8888/2026/11/11/episodio-demo-prueba/",
+  "feed_url": "http://localhost:8888/feed/podcast/"
 }
 ```
 
@@ -69,7 +69,7 @@ Los errores de validación del esquema y de permisos los genera la Abilities API
 Endpoint del servidor por defecto: `/wp-json/mcp/mcp-adapter-default-server`.
 
 ```bash
-URL=https://plugins.lndo.site/wp-json/mcp/mcp-adapter-default-server
+URL=http://localhost:8888/wp-json/mcp/mcp-adapter-default-server
 AUTH='usuario:application password'
 
 # 1. Inicializar y capturar el id de sesión.
