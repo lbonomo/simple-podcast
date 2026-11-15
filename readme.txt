@@ -4,7 +4,7 @@ Tags: podcast, rss, audio, mp3, mcp
 Requires at least: 6.4
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 0.8.0
+Stable tag: 0.9.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -72,8 +72,11 @@ La ruta de entrega del plugin admite HEAD y rangos simples de bytes. Los archivo
 La URL del audio usa el parámetro `lb_sp_audio` (por ejemplo `https://ejemplo.com/mi-entrada/?lb_sp_audio=123&lb_sp_attachment=456`). El plugin pide no cachear esa respuesta (`DONOTCACHEPAGE` y cabeceras `Cache-Control`), pero algunas cachés de página del hosting o de un CDN lo ignoran y sirven la página HTML de la entrada. En ese caso, excluye de la caché de página las URL que contengan el parámetro `lb_sp_audio`, desde el panel del hosting o del plugin de caché. Después purga la caché y comprueba con `curl -I <url>` que la respuesta es `audio/mpeg`.
 
 == Changelog ==
-= Unreleased =
-* Nuevo menú Podcast con Dashboard (estadísticas), Setup (ajustes del canal, antes en Ajustes > Podcast) y Logs (tabla de solicitudes de audio).
+= 0.9.0 =
+* Nuevo menú Podcast con Dashboard (estadísticas), Setup (ajustes del canal, antes en Ajustes > Podcast) y Logs (tabla paginada de solicitudes de audio con detalles desplegables).
+* Agrega el enlace "Configuración" en la fila del plugin de la página Plugins.
+* Elimina los avisos de administración sobre la protección del audio.
+* Elimina las referencias a Lando; el entorno de desarrollo usa wp-env.
 
 = 0.8.0 =
 * Excluye las URL de audio de las cachés de forma temprana para que no se sirva HTML en lugar del archivo.
