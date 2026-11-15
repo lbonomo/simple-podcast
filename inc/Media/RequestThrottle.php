@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace LbSimplePodcast\Media;
 
+use LbSimplePodcast\Tracking\ClientIp;
+
 /**
  * Contador de ventana fija por IP, pensado para costar casi nada.
  *
@@ -33,15 +35,12 @@ final class RequestThrottle {
 	}
 
 	/**
-	 * IP del cliente. Usa solo REMOTE_ADDR; detrás de un proxy de confianza debe
-	 * ajustarse con el filtro `lb_sp_client_ip`.
+	 * IP del cliente (ver {@see ClientIp::resolve()}).
 	 *
 	 * @param array<string, mixed> $server Variables PHP.
 	 */
 	public static function client_ip( array $server ): string {
-		$ip = isset( $server['REMOTE_ADDR'] ) && is_string( $server['REMOTE_ADDR'] ) ? $server['REMOTE_ADDR'] : '';
-		$ip = (string) apply_filters( 'lb_sp_client_ip', $ip, $server );
-		return false !== filter_var( $ip, FILTER_VALIDATE_IP ) ? $ip : '';
+		return ClientIp::resolve( $server );
 	}
 
 	/**

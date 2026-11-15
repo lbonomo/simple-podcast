@@ -31,12 +31,12 @@ Origen: auditoría de seguridad (noviembre 2026). Orden de ejecución: T1 primer
 
 Derivada de T3 (ver `docs/ip-cliente-y-proxies.md`).
 
-- [ ] Usar `RequestThrottle::client_ip()` también en `RequestLog::record()` para que throttling y log usen la misma IP.
-- [ ] Aceptar cabeceras de reenvío solo si `REMOTE_ADDR` está en una lista de proxies de confianza (CIDR IPv4 e IPv6), recorriendo `X-Forwarded-For` de derecha a izquierda.
-- [ ] Configuración por constante `LB_SP_TRUSTED_PROXIES` y filtro; nombre de cabecera configurable.
-- [ ] Opción para anonimizar la IP guardada (IPv4 sin el último octeto, IPv6 a /48).
-- [ ] Documentar en `docs/setup.md` la opción de `real_ip` en Nginx y `mod_remoteip` en Apache.
-- [ ] Tests: IP falsificada ignorada sin proxy de confianza; IP real tomada con proxy de confianza; IPv6; anonimización.
+- [x] Usar `RequestThrottle::client_ip()` también en `RequestLog::record()` para que throttling y log usen la misma IP.
+- [x] Aceptar cabeceras de reenvío solo si `REMOTE_ADDR` está en una lista de proxies de confianza (CIDR IPv4 e IPv6), recorriendo `X-Forwarded-For` de derecha a izquierda.
+- [x] Configuración por constante `LB_SP_TRUSTED_PROXIES` y filtro; nombre de cabecera configurable.
+- [x] Opción para anonimizar la IP guardada (IPv4 sin el último octeto, IPv6 a /48).
+- [x] Documentar en `docs/setup.md` la opción de `real_ip` en Nginx y `mod_remoteip` en Apache.
+- [x] Tests: IP falsificada ignorada sin proxy de confianza; IP real tomada con proxy de confianza; IPv6; anonimización.
 
 ## T4. Proteger la rama `main`
 

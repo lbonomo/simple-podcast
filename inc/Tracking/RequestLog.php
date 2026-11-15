@@ -170,6 +170,8 @@ final class RequestLog {
 			( new ErrorLog() )->add( ErrorLog::SOURCE_LOG_INSERT, __( 'No se pudieron codificar las cabeceras de la solicitud.', 'lb-simple-podcast' ), ErrorLog::LEVEL_ERROR, $post_id, $attachment_id );
 			return false;
 		}
+		$ip     = ClientIp::resolve( $server );
+		$ip     = '' !== $ip && ClientIp::should_anonymize() ? ClientIp::anonymize( $ip ) : $ip;
 		$result = $wpdb->insert( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 			self::table(),
 			array(
@@ -178,7 +180,7 @@ final class RequestLog {
 				'attachment_id' => $attachment_id,
 				'user_id'       => get_current_user_id(),
 				'method'        => substr( isset( $server['REQUEST_METHOD'] ) && is_string( $server['REQUEST_METHOD'] ) ? $server['REQUEST_METHOD'] : '', 0, 32 ),
-				'remote_addr'   => substr( isset( $server['REMOTE_ADDR'] ) && is_string( $server['REMOTE_ADDR'] ) ? $server['REMOTE_ADDR'] : '', 0, 45 ),
+				'remote_addr'   => substr( $ip, 0, 45 ),
 				'request_url'   => mb_strcut( $scheme . $host . $uri, 0, self::MAX_URL_BYTES, 'UTF-8' ),
 				'headers'       => $json,
 				'status'        => $status,
