@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace LbSimplePodcast\Tracking;
 
+use LbSimplePodcast\Admin\Menu;
 use LbSimplePodcast\Feed\FeedVersion;
 
 /** Almacena las solicitudes mediante una tabla por sitio. */
@@ -113,7 +114,7 @@ final class RequestLog {
 
 	/** Muestra un aviso de error a los administradores. */
 	public function notice(): void {
-		if ( current_user_can( 'manage_options' ) && get_option( self::ERROR_OPTION ) ) {
+		if ( current_user_can( Menu::CAPABILITY ) && get_option( self::ERROR_OPTION ) ) {
 			echo '<div class="notice notice-error"><p>' . esc_html__( 'Simple Podcast: no se pudo guardar una solicitud de audio. Revisa la base de datos.', 'lb-simple-podcast' ) . '</p></div>';
 		}
 	}

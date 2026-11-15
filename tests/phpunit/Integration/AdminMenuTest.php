@@ -211,6 +211,91 @@ final class AdminMenuTest extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'Agente &lt;i&gt;', $html );
 	}
 
+	/**
+	 * Roles sin acceso al menú Podcast.
+	 *
+	 * @return array<string, array{0: string}>
+	 */
+	public function non_admin_roles(): array {
+		return array(
+			'editor'      => array( 'editor' ),
+			'author'      => array( 'author' ),
+			'contributor' => array( 'contributor' ),
+			'subscriber'  => array( 'subscriber' ),
+			'anonymous'   => array( '' ),
+		);
+	}
+
+	/**
+	 * @dataProvider non_admin_roles
+	 * @param string $role Rol ('' = sin sesión).
+	 */
+	public function test_menu_pages_reject_non_admins_with_403( string $role ): void {
+		wp_set_current_user( '' === $role ? 0 : self::factory()->user->create( array( 'role' => $role ) ) );
+		$this->log_row( $this->episode( 'A' ) );
+
+		foreach ( array( new DashboardPage(), new LogsPage(), new SettingsPage() ) as $page ) {
+			$status = null;
+			add_filter(
+				'wp_die_handler',
+				static function () use ( &$status ) {
+					return static function ( $message, $title, $args ) use ( &$status ) {
+						$status = is_array( $args ) ? ( $args['response'] ?? null ) : null;
+						throw new \RuntimeException( 'wp_die' );
+					};
+				}
+			);
+			ob_start();
+			try {
+				$page->render();
+				$this->fail( 'La página debió terminar con wp_die().' );
+			} catch ( \RuntimeException $e ) {
+				$this->assertSame( 'wp_die', $e->getMessage() );
+			} finally {
+				ob_end_clean();
+				remove_all_filters( 'wp_die_handler' );
+			}
+			$this->assertSame( 403, $status, get_class( $page ) );
+		}
+	}
+
+	public function test_menu_entries_require_the_admin_capability(): void {
+		global $menu, $submenu;
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		( new Menu() )->add_menus();
+
+		$this->assertSame( 'manage_options', Menu::CAPABILITY );
+		$this->assertSame( Menu::CAPABILITY, SettingsPage::CAPABILITY );
+		foreach ( $menu as $item ) {
+			if ( Menu::PARENT_SLUG === $item[2] ) {
+				$this->assertSame( Menu::CAPABILITY, $item[1] );
+			}
+		}
+		foreach ( $submenu[ Menu::PARENT_SLUG ] as $item ) {
+			$this->assertSame( Menu::CAPABILITY, $item[1] );
+		}
+	}
+
+	public function test_settings_save_capability_is_admin_only(): void {
+		$this->assertSame( 'manage_options', apply_filters( 'option_page_capability_' . SettingsPage::GROUP, 'edit_posts' ) );
+	}
+
+	public function test_log_error_notice_is_shown_to_admins_only(): void {
+		update_option( RequestLog::ERROR_OPTION, '1', false );
+		$log = new RequestLog();
+
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'editor' ) ) );
+		ob_start();
+		$log->notice();
+		$this->assertSame( '', ob_get_clean() );
+
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		ob_start();
+		$log->notice();
+		$this->assertStringContainsString( 'notice-error', (string) ob_get_clean() );
+		delete_option( RequestLog::ERROR_OPTION );
+	}
+
 	public function test_logs_page_without_rows(): void {
 		$html = $this->output( array( new LogsPage(), 'render' ) );
 		$this->assertStringContainsString( 'Sin solicitudes registradas', $html );

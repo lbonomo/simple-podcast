@@ -17,6 +17,22 @@ final class Menu {
 	public const LOGS_SLUG   = 'lb-sp-logs';
 	public const CAPABILITY  = 'manage_options';
 
+	/**
+	 * Corta la petición con 403 si el usuario no es administrador.
+	 *
+	 * Defensa en profundidad: WordPress ya bloquea el acceso a las páginas del menú
+	 * según la capacidad, pero cada pantalla lo vuelve a comprobar por sí misma.
+	 */
+	public static function authorize(): void {
+		if ( ! current_user_can( self::CAPABILITY ) ) {
+			wp_die(
+				esc_html__( 'No tienes permisos para acceder a esta página.', 'lb-simple-podcast' ),
+				'',
+				array( 'response' => 403 )
+			);
+		}
+	}
+
 	/** Engancha los hooks. */
 	public function register(): void {
 		add_action( 'admin_menu', array( $this, 'add_menus' ) );
