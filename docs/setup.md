@@ -124,3 +124,23 @@ Después de cambiar la visibilidad del repositorio o la configuración del actua
 
 ## Probar la ability MCP
 Activar `mcp-adapter` (`npx wp-env run cli wp plugin activate mcp-adapter`) y seguir el ejemplo de [mcp-tool-schema.md](mcp-tool-schema.md). Para una URL de prueba que apunte al propio sitio local (red privada) se puede permitir el host con el filtro `lb_sp_audio_url_allowlist`.
+
+## Producción: IP del cliente detrás de un proxy o CDN
+
+Por defecto el plugin usa `REMOTE_ADDR`. Detrás de un proxy inverso o CDN eso es la IP del proxy, y el límite de solicitudes por IP trata a todos los oyentes como uno solo. Hay tres opciones, de la más a la menos recomendable. Detalle y riesgos en `docs/ip-cliente-y-proxies.md`.
+
+1. **Que el servidor web corrija `REMOTE_ADDR`** (no requiere cambios en el plugin):
+   - Nginx: `set_real_ip_from <rango del proxy>;` y `real_ip_header X-Forwarded-For;` (módulo `ngx_http_realip_module`).
+   - Apache: `RemoteIPHeader X-Forwarded-For` y `RemoteIPInternalProxy <rango del proxy>` (módulo `mod_remoteip`).
+2. **Proxies de confianza en el plugin**, en `wp-config.php`:
+
+   ```php
+   define( 'LB_SP_TRUSTED_PROXIES', array( '203.0.113.0/24', '2001:db8::/32' ) );
+   // Opcional: otra cabecera (por ejemplo, CF-Connecting-IP). Por defecto, X-Forwarded-For.
+   define( 'LB_SP_PROXY_HEADER', 'CF-Connecting-IP' );
+   ```
+
+   Solo se lee la cabecera cuando `REMOTE_ADDR` está en esa lista. Con `X-Forwarded-For` se recorre de derecha a izquierda hasta la primera IP que no sea de un proxy de confianza. Si el origen es accesible sin pasar por el proxy, restrínjalo en el firewall: cualquier otro cliente podría falsificar la cabecera.
+3. **Filtro `lb_sp_client_ip`** para casos especiales.
+
+Para guardar la IP anonimizada en el registro (IPv4 sin el último octeto, IPv6 a /48), añada `define( 'LB_SP_ANONYMIZE_IP', true );`. El límite de solicitudes sigue usando la IP completa, solo en un contador temporal.

@@ -83,8 +83,8 @@ No tiene claves foráneas. `post_id`, `attachment_id` y `user_id` apuntan a `wp_
 | `lb_sp_channel` | Configuración del canal del feed |
 | `lb_sp_feed_version` | Versión del feed |
 | `lb_sp_log_schema_version` | Versión del esquema de la tabla |
-| `lb_sp_log_error` | Aviso de error al registrar solicitudes |
-| `lb_sp_storage_warning` | Aviso de almacenamiento protegido |
+| `lb_sp_errors` | Últimos 50 errores y avisos del plugin (fecha, origen, motivo, contexto, estado leído); sin autoload |
+| `lb_sp_errors_version` | Versión de la migración de los indicadores antiguos `lb_sp_log_error` y `lb_sp_storage_warning` |
 
 ## Transients
 

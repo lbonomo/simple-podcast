@@ -18,9 +18,7 @@ final class DashboardPage {
 
 	/** Dibuja la página. */
 	public function render(): void {
-		if ( ! current_user_can( Menu::CAPABILITY ) ) {
-			return;
-		}
+		Menu::authorize();
 
 		$stats  = new RequestStats();
 		$latest = $stats->latest_audio();

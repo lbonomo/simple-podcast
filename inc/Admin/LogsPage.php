@@ -30,9 +30,7 @@ final class LogsPage {
 
 	/** Dibuja la página. */
 	public function render(): void {
-		if ( ! current_user_can( Menu::CAPABILITY ) ) {
-			return;
-		}
+		Menu::authorize();
 
 		$stats = new RequestStats();
 		$total = $stats->count_all();

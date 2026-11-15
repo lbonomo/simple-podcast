@@ -17,11 +17,14 @@ $lb_sp_cleanup = static function (): void {
 	if ( false === $result ) {
 		error_log( 'Simple Podcast: no se pudo eliminar la tabla de registros de audio.' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 	}
+	wp_clear_scheduled_hook( 'lb_sp_purge_log' );
 	delete_option( 'lb_sp_channel' );
 	delete_option( 'lb_sp_feed_version' );
 	delete_option( 'lb_sp_log_schema_version' );
 	delete_option( 'lb_sp_log_error' );
 	delete_option( 'lb_sp_storage_warning' );
+	delete_option( 'lb_sp_errors' );
+	delete_option( 'lb_sp_errors_version' );
 	delete_transient( 'lb_sp_feed_body' );
 };
 

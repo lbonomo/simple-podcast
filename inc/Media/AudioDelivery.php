@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace LbSimplePodcast\Media;
 
 use LbSimplePodcast\Meta\AudioMeta;
+use LbSimplePodcast\Tracking\ErrorLog;
 use LbSimplePodcast\Tracking\RequestLog;
 use WP_Post;
 
@@ -18,7 +19,6 @@ final class AudioDelivery {
 
 	public const QUERY_POST       = 'lb_sp_audio';
 	public const QUERY_ATTACHMENT = 'lb_sp_attachment';
-	public const WARNING_OPTION   = 'lb_sp_storage_warning';
 
 	/** Registra los hooks. */
 	public function register(): void {
@@ -115,7 +115,18 @@ final class AudioDelivery {
 		$attachment_id = absint( get_query_var( self::QUERY_ATTACHMENT, 0 ) );
 		$server        = (array) wp_unslash( $_SERVER ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		$headers       = $this->request_headers( $server );
-		$response      = $this->response( $post_id, $attachment_id, $server );
+		$wait          = ( new RequestThrottle() )->hit( RequestThrottle::client_ip( $server ) );
+		$response      = $wait > 0
+			? array(
+				'status'   => 429,
+				'headers'  => array( 'Retry-After' => (string) $wait ),
+				'path'     => '',
+				'redirect' => '',
+				'offset'   => 0,
+				'length'   => 0,
+				'valid'    => false,
+			)
+			: $this->response( $post_id, $attachment_id, $server );
 		$file          = false;
 		if ( '' !== $response['path'] && 'HEAD' !== strtoupper( (string) ( $server['REQUEST_METHOD'] ?? 'GET' ) ) ) {
 			$file = @fopen( $response['path'], 'rb' ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged,WordPress.WP.AlternativeFunctions.file_system_operations_fopen
@@ -126,10 +137,13 @@ final class AudioDelivery {
 				}
 				$response['status']  = 500;
 				$response['headers'] = array();
-				update_option( self::WARNING_OPTION, '1', false );
+				$this->report( __( 'No se pudo abrir el archivo de audio para entregarlo.', 'lb-simple-podcast' ), ErrorLog::LEVEL_ERROR, $post_id, $attachment_id );
 			}
 		}
-		( new RequestLog() )->record( $post_id, $attachment_id, $response['status'], $server, $headers );
+		// Solo se registran los enlaces válidos: ni 404, 405, 403 ni solicitudes limitadas.
+		if ( $response['valid'] ) {
+			( new RequestLog() )->record( $post_id, $attachment_id, $response['status'], $server, $headers );
+		}
 
 		status_header( $response['status'] );
 		nocache_headers();
@@ -148,7 +162,7 @@ final class AudioDelivery {
 			while ( $remaining > 0 && ! feof( $file ) && ! connection_aborted() ) {
 				$chunk = fread( $file, min( 65536, $remaining ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fread
 				if ( false === $chunk || '' === $chunk ) {
-					update_option( self::WARNING_OPTION, '1', false );
+					$this->report( __( 'Falló la lectura del archivo de audio durante la entrega.', 'lb-simple-podcast' ), ErrorLog::LEVEL_ERROR, $post_id, $attachment_id );
 					break;
 				}
 				echo $chunk; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
@@ -165,7 +179,7 @@ final class AudioDelivery {
 	 * @param int                  $post_id Entrada.
 	 * @param int                  $attachment_id Attachment.
 	 * @param array<string, mixed> $server Datos de la petición.
-	 * @return array{status: int, headers: array<string, string>, path: string, redirect: string, offset: int, length: int}
+	 * @return array{status: int, headers: array<string, string>, path: string, redirect: string, offset: int, length: int, valid: bool}
 	 */
 	public function response( int $post_id, int $attachment_id, array $server ): array {
 		$response = array(
@@ -175,6 +189,7 @@ final class AudioDelivery {
 			'redirect' => '',
 			'offset'   => 0,
 			'length'   => 0,
+			'valid'    => false,
 		);
 		$method   = strtoupper( (string) ( $server['REQUEST_METHOD'] ?? 'GET' ) );
 		if ( ! in_array( $method, array( 'GET', 'HEAD' ), true ) ) {
@@ -194,13 +209,15 @@ final class AudioDelivery {
 		if ( ! $attachment instanceof WP_Post || 'attachment' !== $attachment->post_type || AudioValidator::MIME_TYPE !== $attachment->post_mime_type ) {
 			return $response;
 		}
-		$path = get_attached_file( $attachment_id );
+		// Enlace válido: entrada pública, attachment coincidente y MP3.
+		$response['valid'] = true;
+		$path              = get_attached_file( $attachment_id );
 		if ( ! is_string( $path ) || ! is_file( $path ) || ! is_readable( $path ) ) {
 			$url   = wp_get_attachment_url( $attachment_id );
 			$url   = is_string( $url ) ? esc_url_raw( $url, array( 'http', 'https' ) ) : '';
 			$parts = wp_parse_url( $url );
 			if ( is_array( $parts ) && ! empty( $parts['host'] ) && isset( $parts['scheme'] ) && in_array( strtolower( $parts['scheme'] ), array( 'http', 'https' ), true ) ) {
-				update_option( self::WARNING_OPTION, '1', false );
+				$this->report( __( 'El archivo local del audio no está disponible; se redirige a la URL del attachment.', 'lb-simple-podcast' ), ErrorLog::LEVEL_WARNING, $post_id, $attachment_id );
 				$response['status']   = 302;
 				$response['redirect'] = $url;
 			}
@@ -280,12 +297,12 @@ final class AudioDelivery {
 		$uploads     = wp_upload_dir();
 		$upload_root = ! empty( $uploads['basedir'] ) ? realpath( $uploads['basedir'] ) : false;
 		if ( false === $dir || false === $root || false === $wp_root || false === $upload_root || ! is_writable( $dir ) || $this->inside( $dir, $root ) || $this->inside( $dir, $wp_root ) || $this->inside( $dir, $upload_root ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_is_writable
-			update_option( self::WARNING_OPTION, '1', false );
+			$this->report( __( 'No hay un directorio privado de audio válido (LB_SP_PRIVATE_AUDIO_DIR); se sirve el archivo original.', 'lb-simple-podcast' ), ErrorLog::LEVEL_WARNING, 0, $attachment_id );
 			return $source;
 		}
 		$hash = hash_file( 'sha256', $source );
 		if ( false === $hash ) {
-			update_option( self::WARNING_OPTION, '1', false );
+			$this->report( __( 'No se pudo calcular el hash del audio; se sirve el archivo original.', 'lb-simple-podcast' ), ErrorLog::LEVEL_WARNING, 0, $attachment_id );
 			return $source;
 		}
 		$target = $dir . '/lb-sp-' . get_current_blog_id() . '-' . $attachment_id . '-' . $hash . '.mp3';
@@ -299,8 +316,20 @@ final class AudioDelivery {
 		if ( false !== $tmp && is_file( $tmp ) ) {
 			wp_delete_file( $tmp );
 		}
-		update_option( self::WARNING_OPTION, '1', false );
+		$this->report( __( 'No se pudo crear la copia privada del audio; se sirve el archivo original.', 'lb-simple-podcast' ), ErrorLog::LEVEL_WARNING, 0, $attachment_id );
 		return $source;
+	}
+
+	/**
+	 * Anota un problema de entrega en el registro de errores.
+	 *
+	 * @param string $message       Motivo.
+	 * @param string $level         Nivel.
+	 * @param int    $post_id       Entrada.
+	 * @param int    $attachment_id Attachment.
+	 */
+	private function report( string $message, string $level, int $post_id, int $attachment_id ): void {
+		( new ErrorLog() )->add( ErrorLog::SOURCE_DELIVERY, $message, $level, $post_id, $attachment_id );
 	}
 
 	/**

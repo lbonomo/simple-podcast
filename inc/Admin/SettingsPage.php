@@ -19,7 +19,7 @@ final class SettingsPage {
 	public const OPTION     = 'lb_sp_channel';
 	public const GROUP      = 'lb_sp_channel_group';
 	public const PAGE_SLUG  = 'lb-simple-podcast';
-	public const CAPABILITY = 'manage_options';
+	public const CAPABILITY = Menu::CAPABILITY;
 
 	public const IMAGE_MIN = 1400;
 	public const IMAGE_MAX = 3000;
@@ -56,7 +56,16 @@ final class SettingsPage {
 	 */
 	public function register(): void {
 		add_action( 'admin_init', array( $this, 'register_setting' ) );
+		// options.php exige esta capacidad al guardar el grupo de ajustes.
+		add_filter( 'option_page_capability_' . self::GROUP, array( $this, 'capability' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue' ) );
+	}
+
+	/**
+	 * Capacidad requerida para guardar los ajustes en options.php.
+	 */
+	public function capability(): string {
+		return self::CAPABILITY;
 	}
 
 	/**
@@ -279,9 +288,7 @@ final class SettingsPage {
 	 * Dibuja la página.
 	 */
 	public function render(): void {
-		if ( ! current_user_can( self::CAPABILITY ) ) {
-			return;
-		}
+		Menu::authorize();
 
 		$channel   = self::get_channel();
 		$name      = self::OPTION;
@@ -348,6 +355,7 @@ final class SettingsPage {
 				</table>
 				<?php submit_button(); ?>
 			</form>
+			<?php ( new ErrorsPanel() )->render(); ?>
 		</div>
 		<?php
 	}

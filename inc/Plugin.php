@@ -59,6 +59,7 @@ final class Plugin {
 	 * Hook de desactivación.
 	 */
 	public static function deactivate(): void {
+		wp_clear_scheduled_hook( Tracking\RequestLog::CRON_HOOK );
 		flush_rewrite_rules();
 	}
 
@@ -95,6 +96,8 @@ final class Plugin {
 			'audio_meta'     => new Meta\AudioMeta(),
 			'audio_delivery' => new Media\AudioDelivery(),
 			'request_log'    => new Tracking\RequestLog(),
+			'error_log'      => new Tracking\ErrorLog(),
+			'errors_panel'   => new Admin\ErrorsPanel(),
 			'editor_assets'  => new Admin\EditorAssets(),
 			'meta_box'       => new Admin\MetaBox(),
 			'settings_page'  => new Admin\SettingsPage(),
