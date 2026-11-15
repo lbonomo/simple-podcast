@@ -17,7 +17,7 @@ flowchart LR
   Meta --> REST[audio_data en wp/v2/posts]
   Meta --> Feed[/feed/podcast/]
   Meta --> SEO[OG + JSON-LD en wp_head]
-  Settings[Ajustes > Podcast] --> Feed
+  Settings[Podcast > Setup] --> Feed
 ```
 
 La fuente de verdad del audio es el meta `_lb_sp_audio_id` (ID de un attachment `audio/mpeg`). El tamaño y la duración se derivan del attachment; la URL pública del plugin pasa por la ruta de entrega y registro descrita abajo.
@@ -64,7 +64,10 @@ Si no puede crearse una copia, se sirve el original local y se muestra un aviso.
 | `Media\AudioIngestor` | Ingesta por URL (anti-SSRF, tope de tamaño, timeout) o base64 (tamaño estimado antes de decodificar, decodificación estricta). Reemplaza el audio anterior sin dejar huérfanos. |
 | `Admin\EditorAssets` | Encola el panel de Gutenberg solo en el editor de `post`. |
 | `Admin\MetaBox` | Respaldo para el editor clásico (nonce, capability, validación). |
-| `Admin\SettingsPage` | Ajustes del canal (Ajustes > Podcast), opción `lb_sp_channel`. |
+| `Admin\Menu` | Menú Podcast con los submenús Dashboard, Setup y Logs. |
+| `Admin\DashboardPage` / `Admin\LogsPage` | Estadísticas (audios, último audio, solicitudes y top 5 de 30 días; cuenta estados 200 y 206) y tabla paginada (50 filas) de `lb_sp_audio_requests`. |
+| `Tracking\RequestStats` | Consultas de lectura de la tabla de solicitudes. |
+| `Admin\SettingsPage` | Ajustes del canal (Podcast > Setup), opción `lb_sp_channel`. |
 | `Feed\FeedRegistrar` | `add_feed( 'podcast' )`, cabeceras, invalidación de caché. |
 | `Feed\PodcastFeedRenderer` | Query, datos del canal/episodios, ETag/Last-Modified/304 y caché del cuerpo. |
 | `Feed\FeedVersion` | Marca temporal del último cambio relevante (base del ETag). |

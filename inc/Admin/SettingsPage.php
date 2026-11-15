@@ -12,7 +12,7 @@ namespace LbSimplePodcast\Admin;
 use WP_Error;
 
 /**
- * Ajustes del canal (Ajustes > Podcast), guardados en la opción `lb_sp_channel`.
+ * Ajustes del canal (Podcast > Setup), guardados en la opción `lb_sp_channel`.
  */
 final class SettingsPage {
 
@@ -55,7 +55,6 @@ final class SettingsPage {
 	 * Engancha los hooks.
 	 */
 	public function register(): void {
-		add_action( 'admin_menu', array( $this, 'add_page' ) );
 		add_action( 'admin_init', array( $this, 'register_setting' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue' ) );
 	}
@@ -127,19 +126,6 @@ final class SettingsPage {
 				'default'           => array(),
 				'show_in_rest'      => false,
 			)
-		);
-	}
-
-	/**
-	 * Agrega la página bajo Ajustes.
-	 */
-	public function add_page(): void {
-		add_options_page(
-			__( 'Podcast', 'lb-simple-podcast' ),
-			__( 'Podcast', 'lb-simple-podcast' ),
-			self::CAPABILITY,
-			self::PAGE_SLUG,
-			array( $this, 'render' )
 		);
 	}
 
@@ -274,7 +260,7 @@ final class SettingsPage {
 	 * @param string $hook_suffix Pantalla actual.
 	 */
 	public function enqueue( string $hook_suffix ): void {
-		if ( 'settings_page_' . self::PAGE_SLUG !== $hook_suffix ) {
+		if ( ! str_ends_with( $hook_suffix, '_page_' . self::PAGE_SLUG ) ) {
 			return;
 		}
 		wp_enqueue_media();
@@ -302,7 +288,8 @@ final class SettingsPage {
 		$image_url = $channel['image_id'] > 0 ? wp_get_attachment_image_url( $channel['image_id'], 'medium' ) : false;
 		?>
 		<div class="wrap">
-			<h1><?php esc_html_e( 'Podcast', 'lb-simple-podcast' ); ?></h1>
+			<h1><?php esc_html_e( 'Podcast: Setup', 'lb-simple-podcast' ); ?></h1>
+			<?php settings_errors( self::OPTION ); ?>
 			<p>
 				<?php esc_html_e( 'URL del feed:', 'lb-simple-podcast' ); ?>
 				<code><?php echo esc_url( get_feed_link( 'podcast' ) ); ?></code>

@@ -3,7 +3,7 @@
  * Bootstrap de PHPUnit con la suite de tests de WordPress.
  *
  * Variables de entorno opcionales: LB_SP_DB_NAME, LB_SP_DB_USER, LB_SP_DB_PASSWORD,
- * LB_SP_DB_HOST y LB_SP_WP_ABSPATH (por defecto, los valores del entorno Lando).
+ * LB_SP_DB_HOST y LB_SP_WP_ABSPATH (por defecto, los valores del entorno de pruebas de wp-env).
  *
  * @package LbSimplePodcast
  */
@@ -21,11 +21,11 @@ $lb_sp_env = static function ( string $name, string $fallback ): string {
 define( 'WP_TESTS_CONFIG_FILE_PATH', __DIR__ . '/wp-tests-config.php' );
 // phpcs:disable WordPress.WP.CapitalPDangit
 $lb_sp_config = "<?php\n"
-	. "define( 'ABSPATH', '" . rtrim( $lb_sp_env( 'LB_SP_WP_ABSPATH', '/app/wordpress' ), '/' ) . "/' );\n"
+	. "define( 'ABSPATH', '" . rtrim( $lb_sp_env( 'LB_SP_WP_ABSPATH', '/var/www/html' ), '/' ) . "/' );\n"
 	. "define( 'DB_NAME', '" . $lb_sp_env( 'LB_SP_DB_NAME', 'wordpress_test' ) . "' );\n"
-	. "define( 'DB_USER', '" . $lb_sp_env( 'LB_SP_DB_USER', 'wordpress' ) . "' );\n"
-	. "define( 'DB_PASSWORD', '" . $lb_sp_env( 'LB_SP_DB_PASSWORD', 'wordpress' ) . "' );\n"
-	. "define( 'DB_HOST', '" . $lb_sp_env( 'LB_SP_DB_HOST', 'database' ) . "' );\n"
+	. "define( 'DB_USER', '" . $lb_sp_env( 'LB_SP_DB_USER', 'root' ) . "' );\n"
+	. "define( 'DB_PASSWORD', '" . $lb_sp_env( 'LB_SP_DB_PASSWORD', 'password' ) . "' );\n"
+	. "define( 'DB_HOST', '" . $lb_sp_env( 'LB_SP_DB_HOST', 'tests-mysql' ) . "' );\n"
 	. "define( 'DB_CHARSET', 'utf8' );\n"
 	. "define( 'DB_COLLATE', '' );\n"
 	. "define( 'WP_TESTS_DOMAIN', 'example.org' );\n"
