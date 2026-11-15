@@ -53,27 +53,78 @@ final class AuthorPreservationTest extends TestCase {
 		return null;
 	}
 
-	public function test_version_header_is_0_7_0(): void {
-		$this->assertSame( '0.7.0', $this->header( 'Version' ) );
+	/**
+	 * Versión declarada en la constante LB_SP_VERSION (fuente de verdad).
+	 *
+	 * @return string
+	 */
+	private function constant_version(): string {
+		$this->assertSame(
+			1,
+			preg_match( "/define\\( 'LB_SP_VERSION', '([^']+)' \\);/", $this->read( 'lb-simple-podcast.php' ), $m ),
+			'No se encontró la definición de LB_SP_VERSION.'
+		);
+		return $m[1];
 	}
 
-	public function test_version_constant_is_0_7_0(): void {
-		$this->assertMatchesRegularExpression( "/define\( 'LB_SP_VERSION', '0\.7\.0' \);/", $this->read( 'lb-simple-podcast.php' ) );
+	public function test_version_constant_is_a_semantic_version(): void {
+		$this->assertMatchesRegularExpression( '/^\d+\.\d+\.\d+$/', $this->constant_version() );
 	}
 
-	public function test_package_json_version_is_0_7_0(): void {
+	public function test_loaded_constant_matches_the_declared_version(): void {
+		if ( ! defined( 'LB_SP_VERSION' ) ) {
+			$this->markTestSkipped( 'LB_SP_VERSION no está cargada en este entorno.' );
+		}
+		$this->assertSame( $this->constant_version(), LB_SP_VERSION );
+	}
+
+	public function test_version_header_matches_constant(): void {
+		$this->assertSame( $this->constant_version(), $this->header( 'Version' ) );
+	}
+
+	public function test_package_json_version_matches_constant(): void {
 		$data = json_decode( $this->read( 'package.json' ), true );
-		$this->assertSame( '0.7.0', $data['version'] );
+		$this->assertSame( $this->constant_version(), $data['version'] );
 	}
 
-	public function test_package_lock_versions_are_0_7_0(): void {
+	public function test_package_lock_versions_match_constant(): void {
 		$data = json_decode( $this->read( 'package-lock.json' ), true );
-		$this->assertSame( '0.7.0', $data['version'] );
-		$this->assertSame( '0.7.0', $data['packages']['']['version'] );
+		$this->assertSame( $this->constant_version(), $data['version'] );
+		$this->assertSame( $this->constant_version(), $data['packages']['']['version'] );
 	}
 
-	public function test_readme_stable_tag_is_0_7_0(): void {
-		$this->assertMatchesRegularExpression( '/^Stable tag:\s*0\.7\.0\s*$/m', $this->read( 'readme.txt' ) );
+	public function test_readme_stable_tag_matches_constant(): void {
+		$this->assertMatchesRegularExpression( '/^Stable tag:\s*' . preg_quote( $this->constant_version(), '/' ) . '\s*$/m', $this->read( 'readme.txt' ) );
+	}
+
+	public function test_readme_has_a_changelog_entry_for_the_version(): void {
+		$this->assertMatchesRegularExpression( '/^= ' . preg_quote( $this->constant_version(), '/' ) . ' =\s*$/m', $this->read( 'readme.txt' ) );
+	}
+
+	public function test_no_hardcoded_plugin_version_in_php_sources(): void {
+		$version = $this->constant_version();
+		$files   = array();
+		foreach ( array( 'inc', 'templates' ) as $dir ) {
+			$iterator = new \RecursiveIteratorIterator( new \RecursiveDirectoryIterator( $this->root() . '/' . $dir, \FilesystemIterator::SKIP_DOTS ) );
+			foreach ( $iterator as $file ) {
+				if ( $file instanceof \SplFileInfo && 'php' === $file->getExtension() ) {
+					$files[] = $file->getPathname();
+				}
+			}
+		}
+		$this->assertNotEmpty( $files );
+		foreach ( $files as $file ) {
+			$code = (string) file_get_contents( $file );
+			$this->assertStringNotContainsString( $version, $code, "Versión escrita a mano en $file; usar LB_SP_VERSION." );
+			$this->assertDoesNotMatchRegularExpression( "/['\"]\\d+\\.\\d+\\.\\d+['\"]/", $code, "Literal de versión en $file; usar LB_SP_VERSION." );
+		}
+		// El archivo principal solo puede declarar la versión en la cabecera y en la constante.
+		$main = (string) preg_replace( "/^.*(Version:|define\\( 'LB_SP_VERSION').*$/m", '', $this->read( 'lb-simple-podcast.php' ) );
+		$this->assertStringNotContainsString( $version, $main );
+	}
+
+	public function test_phpstan_bootstrap_does_not_hardcode_the_version(): void {
+		$this->assertDoesNotMatchRegularExpression( "/['\"]\\d+\\.\\d+\\.\\d+['\"]/", $this->read( 'tests/phpstan/bootstrap.php' ) );
 	}
 
 	/**
