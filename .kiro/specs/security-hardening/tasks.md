@@ -40,11 +40,17 @@ Derivada de T3 (ver `docs/ip-cliente-y-proxies.md`).
 
 ## T4. Proteger la rama `main`
 
-- [ ] Activar protección de rama: pull request obligatorio, checks de `test.yml` obligatorios, sin force push ni borrado.
-- [ ] Exigir 2FA en la cuenta de GitHub y revisar los tokens con acceso al repo.
-- [ ] Proteger los tags de release.
-- [ ] Evaluar publicar un checksum del ZIP del release y verificarlo en el actualizador (`plugin-update-checker`).
+- [x] Activar protección de rama: pull request obligatorio, checks de `test.yml` obligatorios, sin force push ni borrado.
+- [ ] Exigir 2FA en la cuenta de GitHub y revisar los tokens con acceso al repo (manual: no se puede verificar por API).
+- [x] Proteger los tags de release.
+- [ ] (Fuera de alcance por ahora) Evaluar publicar un checksum del ZIP del release y verificarlo en el actualizador (`plugin-update-checker`).
 - [ ] Nota: el flujo de release de `AGENTS.md` hace merge directo del PR. Ajustarlo si se exige aprobación.
+
+Aplicado el 15/11/2026 con `gh api`:
+
+- `main`: PR obligatorio (0 aprobaciones), 6 checks obligatorios con rama al día, sin force push ni borrado, reglas también para administradores.
+- Ruleset `protect-release-tags` (id 27331472): impide actualizar, borrar o reescribir tags existentes; crear tags nuevos sigue permitido.
+- Borrado automático de ramas fusionadas activado.
 
 ## T5. Mejorar el registro de errores del plugin y permitir marcarlo como leído
 
