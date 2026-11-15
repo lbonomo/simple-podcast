@@ -115,7 +115,18 @@ final class AudioDelivery {
 		$attachment_id = absint( get_query_var( self::QUERY_ATTACHMENT, 0 ) );
 		$server        = (array) wp_unslash( $_SERVER ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		$headers       = $this->request_headers( $server );
-		$response      = $this->response( $post_id, $attachment_id, $server );
+		$wait          = ( new RequestThrottle() )->hit( RequestThrottle::client_ip( $server ) );
+		$response      = $wait > 0
+			? array(
+				'status'   => 429,
+				'headers'  => array( 'Retry-After' => (string) $wait ),
+				'path'     => '',
+				'redirect' => '',
+				'offset'   => 0,
+				'length'   => 0,
+				'valid'    => false,
+			)
+			: $this->response( $post_id, $attachment_id, $server );
 		$file          = false;
 		if ( '' !== $response['path'] && 'HEAD' !== strtoupper( (string) ( $server['REQUEST_METHOD'] ?? 'GET' ) ) ) {
 			$file = @fopen( $response['path'], 'rb' ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged,WordPress.WP.AlternativeFunctions.file_system_operations_fopen
@@ -129,7 +140,10 @@ final class AudioDelivery {
 				update_option( self::WARNING_OPTION, '1', false );
 			}
 		}
-		( new RequestLog() )->record( $post_id, $attachment_id, $response['status'], $server, $headers );
+		// Solo se registran los enlaces válidos: ni 404, 405, 403 ni solicitudes limitadas.
+		if ( $response['valid'] ) {
+			( new RequestLog() )->record( $post_id, $attachment_id, $response['status'], $server, $headers );
+		}
 
 		status_header( $response['status'] );
 		nocache_headers();
@@ -165,7 +179,7 @@ final class AudioDelivery {
 	 * @param int                  $post_id Entrada.
 	 * @param int                  $attachment_id Attachment.
 	 * @param array<string, mixed> $server Datos de la petición.
-	 * @return array{status: int, headers: array<string, string>, path: string, redirect: string, offset: int, length: int}
+	 * @return array{status: int, headers: array<string, string>, path: string, redirect: string, offset: int, length: int, valid: bool}
 	 */
 	public function response( int $post_id, int $attachment_id, array $server ): array {
 		$response = array(
@@ -175,6 +189,7 @@ final class AudioDelivery {
 			'redirect' => '',
 			'offset'   => 0,
 			'length'   => 0,
+			'valid'    => false,
 		);
 		$method   = strtoupper( (string) ( $server['REQUEST_METHOD'] ?? 'GET' ) );
 		if ( ! in_array( $method, array( 'GET', 'HEAD' ), true ) ) {
@@ -194,7 +209,9 @@ final class AudioDelivery {
 		if ( ! $attachment instanceof WP_Post || 'attachment' !== $attachment->post_type || AudioValidator::MIME_TYPE !== $attachment->post_mime_type ) {
 			return $response;
 		}
-		$path = get_attached_file( $attachment_id );
+		// Enlace válido: entrada pública, attachment coincidente y MP3.
+		$response['valid'] = true;
+		$path              = get_attached_file( $attachment_id );
 		if ( ! is_string( $path ) || ! is_file( $path ) || ! is_readable( $path ) ) {
 			$url   = wp_get_attachment_url( $attachment_id );
 			$url   = is_string( $url ) ? esc_url_raw( $url, array( 'http', 'https' ) ) : '';

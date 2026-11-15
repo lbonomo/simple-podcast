@@ -59,6 +59,7 @@ final class Plugin {
 	 * Hook de desactivación.
 	 */
 	public static function deactivate(): void {
+		wp_clear_scheduled_hook( Tracking\RequestLog::CRON_HOOK );
 		flush_rewrite_rules();
 	}
 

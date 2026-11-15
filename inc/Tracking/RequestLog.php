@@ -18,11 +18,86 @@ final class RequestLog {
 	public const VERSION        = '1';
 	public const VERSION_OPTION = 'lb_sp_log_schema_version';
 	public const ERROR_OPTION   = 'lb_sp_log_error';
+	public const CRON_HOOK      = 'lb_sp_purge_log';
+
+	public const DEFAULT_RETENTION_DAYS = 90;
+	public const PURGE_BATCH            = 1000;
+	public const MAX_URL_BYTES          = 2048;
+	public const MAX_HEADERS_BYTES      = 4096;
+	public const MAX_HEADER_NAME_BYTES  = 128;
+	public const MAX_HEADER_VALUE_BYTES = 512;
 
 	/** Registra los hooks. */
 	public function register(): void {
 		add_action( 'init', array( $this, 'upgrade' ), 1 );
+		add_action( 'init', array( $this, 'schedule_purge' ) );
+		add_action( self::CRON_HOOK, array( $this, 'run_purge' ) );
 		add_action( 'admin_notices', array( $this, 'notice' ) );
+	}
+
+	/** Programa la purga diaria si todavía no existe. */
+	public function schedule_purge(): void {
+		if ( ! wp_next_scheduled( self::CRON_HOOK ) ) {
+			wp_schedule_event( time() + HOUR_IN_SECONDS, 'daily', self::CRON_HOOK );
+		}
+	}
+
+	/** Callback de WP-Cron. */
+	public function run_purge(): void {
+		$this->purge();
+	}
+
+	/**
+	 * Borra los registros anteriores al período de retención.
+	 *
+	 * Los días se ajustan con el filtro `lb_sp_log_retention_days` (0 conserva todo).
+	 *
+	 * @return int Filas eliminadas.
+	 */
+	public function purge(): int {
+		global $wpdb;
+		$days = (int) apply_filters( 'lb_sp_log_retention_days', self::DEFAULT_RETENTION_DAYS );
+		if ( $days <= 0 ) {
+			return 0;
+		}
+		$table   = self::table();
+		$cutoff  = gmdate( 'Y-m-d H:i:s', time() - $days * DAY_IN_SECONDS );
+		$deleted = 0;
+		// Lotes acotados para no bloquear la tabla; el resto se borra en la siguiente ejecución.
+		for ( $batch = 0; $batch < 20; $batch++ ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$rows = $wpdb->query( $wpdb->prepare( "DELETE FROM `$table` WHERE requested_at < %s LIMIT %d", $cutoff, self::PURGE_BATCH ) );
+			if ( ! is_int( $rows ) || $rows <= 0 ) {
+				break;
+			}
+			$deleted += $rows;
+			if ( $rows < self::PURGE_BATCH ) {
+				break;
+			}
+		}
+		return $deleted;
+	}
+
+	/**
+	 * Acota el tamaño de las cabeceras guardadas.
+	 *
+	 * @param array<string, string> $headers Cabeceras recibidas.
+	 * @return array<string, string>
+	 */
+	private function limit_headers( array $headers ): array {
+		$out  = array();
+		$size = 2;
+		foreach ( $headers as $name => $value ) {
+			$name  = mb_strcut( (string) $name, 0, self::MAX_HEADER_NAME_BYTES, 'UTF-8' );
+			$value = mb_strcut( $value, 0, self::MAX_HEADER_VALUE_BYTES, 'UTF-8' );
+			$item  = wp_json_encode( array( $name => $value ), JSON_INVALID_UTF8_SUBSTITUTE );
+			$size += false === $item ? 0 : strlen( $item );
+			if ( $size > self::MAX_HEADERS_BYTES ) {
+				break;
+			}
+			$out[ $name ] = $value;
+		}
+		return $out;
 	}
 
 	/** Nombre de tabla para el sitio actual. */
@@ -85,7 +160,7 @@ final class RequestLog {
 		$scheme = is_ssl() ? 'https://' : 'http://';
 		$host   = isset( $server['HTTP_HOST'] ) && is_string( $server['HTTP_HOST'] ) ? $server['HTTP_HOST'] : '';
 		$uri    = isset( $server['REQUEST_URI'] ) && is_string( $server['REQUEST_URI'] ) ? $server['REQUEST_URI'] : '';
-		$json   = wp_json_encode( $headers, JSON_INVALID_UTF8_SUBSTITUTE );
+		$json   = wp_json_encode( $this->limit_headers( $headers ), JSON_INVALID_UTF8_SUBSTITUTE );
 		if ( false === $json ) {
 			update_option( self::ERROR_OPTION, '1', false );
 			return false;
@@ -99,7 +174,7 @@ final class RequestLog {
 				'user_id'       => get_current_user_id(),
 				'method'        => substr( isset( $server['REQUEST_METHOD'] ) && is_string( $server['REQUEST_METHOD'] ) ? $server['REQUEST_METHOD'] : '', 0, 32 ),
 				'remote_addr'   => substr( isset( $server['REMOTE_ADDR'] ) && is_string( $server['REMOTE_ADDR'] ) ? $server['REMOTE_ADDR'] : '', 0, 45 ),
-				'request_url'   => $scheme . $host . $uri,
+				'request_url'   => mb_strcut( $scheme . $host . $uri, 0, self::MAX_URL_BYTES, 'UTF-8' ),
 				'headers'       => $json,
 				'status'        => $status,
 			),

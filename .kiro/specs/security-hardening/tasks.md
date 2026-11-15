@@ -13,13 +13,13 @@ Origen: auditoría de seguridad (noviembre 2026). Orden de ejecución: T1 primer
 
 ## T2. Throttling del lado servidor y registro solo de enlaces válidos
 
-- [ ] Registrar en la base de datos únicamente solicitudes que resuelven a un audio válido (post del tipo correcto, attachment coincidente, estado publicado). No insertar para 404, 405 ni parámetros inventados.
-- [ ] Throttling barato en PHP/WordPress: contador por IP en transient u object cache, con ventana corta. No consultar la base de datos para decidir.
-- [ ] Definir el umbral por defecto, qué respuesta se da al superar el límite (429 con `Retry-After`) y si esas respuestas se registran.
-- [ ] Definir la fuente de la IP (`REMOTE_ADDR` por defecto, filtro para proxies de confianza).
-- [ ] Topes de tamaño para `request_url` (2048) y `headers` (4 KB).
-- [ ] Purga automática por antigüedad (WP-Cron) con retención configurable.
-- [ ] Tests: no se inserta para enlaces inválidos; se aplica el límite; la purga elimina solo lo antiguo.
+- [x] Registrar en la base de datos únicamente solicitudes que resuelven a un audio válido (post del tipo correcto, attachment coincidente, estado publicado). No insertar para 404, 405 ni parámetros inventados.
+- [x] Throttling barato en PHP/WordPress: contador por IP en transient u object cache, con ventana corta. No consultar la base de datos para decidir.
+- [x] Definir el umbral por defecto, qué respuesta se da al superar el límite (429 con `Retry-After`) y si esas respuestas se registran.
+- [x] Definir la fuente de la IP (`REMOTE_ADDR` por defecto, filtro para proxies de confianza).
+- [x] Topes de tamaño para `request_url` (2048) y `headers` (4 KB).
+- [x] Purga automática por antigüedad (WP-Cron) con retención configurable.
+- [x] Tests: no se inserta para enlaces inválidos; se aplica el límite; la purga elimina solo lo antiguo.
 
 ## T3. Analizar alternativas para IP y cabeceras de proxy
 
