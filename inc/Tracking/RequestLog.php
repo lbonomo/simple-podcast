@@ -72,6 +72,9 @@ final class RequestLog {
 				break;
 			}
 		}
+		if ( $deleted > 0 ) {
+			RequestStats::invalidate_cache();
+		}
 		return $deleted;
 	}
 

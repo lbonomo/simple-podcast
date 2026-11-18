@@ -58,15 +58,18 @@ Si no puede crearse una copia, se sirve el original local y se muestra un aviso.
 
 | Clase | Responsabilidad |
 | --- | --- |
-| `Plugin` | Bootstrap. `boot()` crea los servicios (`audio_meta`, `editor_assets`, `meta_box`, `settings_page`, `feed`, `seo_headers`, `mcp_ability`). `activate()` registra el feed y refresca las rewrite rules. |
+| `Plugin` | Bootstrap. `boot()` crea los servicios (`audio_meta`, `editor_assets`, `meta_box`, `settings_page`, `feed`, `player`, `stats_shortcode`, `stats_block`, `seo_headers`, `mcp_ability`). `activate()` registra el feed y refresca las rewrite rules. |
 | `Meta\AudioMeta` | `register_post_meta` de `_lb_sp_audio_id` (REST, `absint`, `auth_callback` → `edit_post`), bloqueo de escrituras inválidas, campo REST `audio_data`, y helpers `get_attachment_id()` / `get_audio_data()`. |
 | `Media\AudioValidator` | Mime real (`wp_check_filetype_and_ext` + `finfo`), tamaño máximo y duración (`wp_read_audio_metadata`). Devuelve `WP_Error` con códigos `lb_sp_*`. |
 | `Media\AudioIngestor` | Ingesta por URL (anti-SSRF, tope de tamaño, timeout) o base64 (tamaño estimado antes de decodificar, decodificación estricta). Reemplaza el audio anterior sin dejar huérfanos. |
 | `Admin\EditorAssets` | Encola el panel de Gutenberg solo en el editor de `post`. |
 | `Admin\MetaBox` | Respaldo para el editor clásico (nonce, capability, validación). |
 | `Admin\Menu` | Menú Podcast con los submenús Dashboard, Setup y Logs. |
-| `Admin\DashboardPage` / `Admin\LogsPage` | Estadísticas (audios, último audio, solicitudes y top 5 de 30 días; cuenta estados 200 y 206) y tabla paginada (50 filas) de `lb_sp_audio_requests`. |
-| `Tracking\RequestStats` | Consultas de lectura de la tabla de solicitudes. |
+| `Admin\DashboardPage` / `Admin\LogsPage` | Estadísticas con caché de 1 h (KPIs de escuchas estimadas, solicitudes GET, oyentes únicos, gráficas SVG de tendencia diaria y clientes, filtro por período/episodio y top 10 excluyendo `HEAD` y bots) y tabla paginada (50 filas) de `lb_sp_audio_requests`. |
+| `Tracking\RequestStats` | Consultas de lectura y agregación de la tabla de solicitudes (incluye clasificación de `User-Agent`, detección de bots, caché en transient de 1 h y `public_stats()` sin PII para el frontend). |
+| `Frontend\PlayerInjector` | Inyección automática del reproductor HTML5 en `the_content` (`templates/player.php`). |
+| `Frontend\StatsShortcode` | Shortcode público `[lb_podcast_stats]` (`templates/stats.php`, CSS bajo demanda `assets/css/stats.css`). |
+| `Frontend\StatsBlock` | Bloque dinámico de Gutenberg `lb-simple-podcast/podcast-stats` (`inc/Frontend/block.json`, `assets/src/stats-block.js`), delega el renderizado seguro en `StatsShortcode`. |
 | `Admin\SettingsPage` | Ajustes del canal (Podcast > Setup), opción `lb_sp_channel`. |
 | `Feed\FeedRegistrar` | `add_feed( 'podcast' )`, cabeceras, invalidación de caché. |
 | `Feed\PodcastFeedRenderer` | Query, datos del canal/episodios, ETag/Last-Modified/304 y caché del cuerpo. |
@@ -115,6 +118,13 @@ Filtros: `lb_sp_seo_output_og`, `lb_sp_seo_output_jsonld`, `lb_sp_seo_jsonld`.
 
 El CSS (`assets/css/player.css`) se registra siempre pero se encola solo al renderizar el reproductor.
 
+### Shortcode público de estadísticas (`[lb_podcast_stats]`)
+
+`Frontend\StatsShortcode` (servicio `stats_shortcode`) registra el shortcode `[lb_podcast_stats]` y la hoja de estilos `assets/css/stats.css` (encolada solo cuando se renderiza). Usa `RequestStats::public_stats()` y la plantilla `templates/stats.php` (sobrescribible en `{tema}/lb-simple-podcast/stats.php`).
+
+- **Atributos estáticos:** `days` (`7`, `30`, `90`; defecto `30`), `post_id` (`0`, ID numérico o `current`; defecto `0`), `show` (lista blanca: `summary`, `listens`, `episodes`, `listeners`, `top_episodes`, `clients`; defecto `summary`), `limit` (`1..10`; defecto `5`), `title`, `class`.
+- **Seguridad y privacidad:** no lee parámetros de URL (`$_GET`/`$_POST`), no expone IPs, cabeceras, `User-Agent` crudos, URLs ni códigos de error/bots; falla cerrado ante `post_id` inexistentes, no publicados, con contraseña o sin MP3; filtra `top_episodes` en tiempo de renderizado con `RequestStats::is_public_episode()` sin depender de la sesión del usuario; y no renderiza en feeds, extractos ni entradas protegidas por contraseña sin desbloquear.
+
 ### Filtros y hooks públicos
 
 | Filtro | Uso |
@@ -127,6 +137,7 @@ El CSS (`assets/css/player.css`) se registra siempre pero se encola solo al rend
 | `lb_sp_episode_explicit`, `lb_sp_episode_type` | `itunes:explicit` e `itunes:episodeType` por episodio. |
 | `lb_sp_seo_output_og`, `lb_sp_seo_output_jsonld`, `lb_sp_seo_jsonld` | Metadatos SEO. |
 | `lb_sp_player_enabled`, `lb_sp_player_position`, `lb_sp_player_html`, `lb_sp_player_enqueue_styles` | Reproductor en la entrada (activación, posición `before`/`after`, HTML y CSS). |
+| `lb_sp_stats_enabled`, `lb_sp_stats_data`, `lb_sp_stats_html`, `lb_sp_stats_enqueue_styles` | Shortcode público `[lb_podcast_stats]` (activación, datos agregados, HTML y CSS). |
 
 ## Desinstalación
 `uninstall.php` borra las opciones (`lb_sp_channel`, `lb_sp_feed_version`) y el transient del feed. No toca los attachments ni el meta de las entradas, para no perder contenido del usuario.

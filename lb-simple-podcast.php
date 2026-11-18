@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       Simple Podcast
  * Description:       Asocia un MP3 a cada entrada, publica un feed RSS de podcast, agrega metadatos SEO y expone una ability MCP.
- * Version:           1.1.0
+ * Version:           1.2.0
  * Requires at least: 6.4
  * Requires PHP:      8.1
  * Author:            Lucas Bonomo
@@ -17,7 +17,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'LB_SP_VERSION', '1.1.0' );
+define( 'LB_SP_VERSION', '1.2.0' );
 define( 'LB_SP_FILE', __FILE__ );
 define( 'LB_SP_DIR', plugin_dir_path( __FILE__ ) );
 define( 'LB_SP_URL', plugin_dir_url( __FILE__ ) );
