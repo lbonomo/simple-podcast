@@ -92,7 +92,7 @@ La URL del audio usa el parámetro `lb_sp_audio` (por ejemplo `https://ejemplo.c
 * Nuevo menú Podcast con Dashboard (estadísticas), Setup (ajustes del canal, antes en Ajustes > Podcast) y Logs (tabla paginada de solicitudes de audio con detalles desplegables).
 * Agrega el enlace "Configuración" en la fila del plugin de la página Plugins.
 * Elimina los avisos de administración sobre la protección del audio.
-* Elimina las referencias a Lando; el entorno de desarrollo usa wp-env.
+* Configura wp-env como entorno de desarrollo local.
 
 = 0.8.0 =
 * Excluye las URL de audio de las cachés de forma temprana para que no se sirva HTML en lugar del archivo.

@@ -1,6 +1,6 @@
 # Entorno de desarrollo
 
-El plugin se desarrolla con [`wp-env`](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-env/), que levanta un WordPress local con Docker y monta esta carpeta como plugin.
+El plugin se desarrolla con [`wp-env`](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-env/), que levanta un WordPress local con Docker y monta esta carpeta como plugin. Consulta [wp-env.md](wp-env.md) para la guía completa de instalación de Docker/runtimes, comandos de reinicio y solución de problemas.
 
 > La carpeta del plugin es `simple-podcast`, pero el slug, el archivo principal y el text domain son `lb-simple-podcast`. El zip de producción instala la carpeta `lb-simple-podcast/`.
 
@@ -63,7 +63,7 @@ docker exec <contenedor tests-mysql> mysql -uroot -ppassword -e "CREATE DATABASE
 | Tarea | Dónde | Comando |
 | --- | --- | --- |
 | PHPUnit | este repo | `npx wp-env run tests-cli --env-cwd=wp-content/plugins/simple-podcast vendor/bin/phpunit` |
-| Solo unitarios | idem | `... vendor/bin/phpunit --testsuite unit` |
+| Solo unitarios | este repo | `npx wp-env run tests-cli --env-cwd=wp-content/plugins/simple-podcast vendor/bin/phpunit --testsuite unit` |
 | PHPStan (nivel 8) | este repo | `composer phpstan` |
 | PHPCS (WordPress-Core/Extra/Docs) | este repo | `composer phpcs` (corrección automática: `vendor/bin/phpcbf`) |
 | Jest | este repo | `npm test` |
