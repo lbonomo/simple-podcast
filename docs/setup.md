@@ -63,7 +63,7 @@ docker exec <contenedor tests-mysql> mysql -uroot -ppassword -e "CREATE DATABASE
 | Tarea | Dónde | Comando |
 | --- | --- | --- |
 | PHPUnit | este repo | `npx wp-env run tests-cli --env-cwd=wp-content/plugins/simple-podcast vendor/bin/phpunit` |
-| Solo unitarios | idem | `... vendor/bin/phpunit --testsuite unit` |
+| Solo unitarios | este repo | `npx wp-env run tests-cli --env-cwd=wp-content/plugins/simple-podcast vendor/bin/phpunit --testsuite unit` |
 | PHPStan (nivel 8) | este repo | `composer phpstan` |
 | PHPCS (WordPress-Core/Extra/Docs) | este repo | `composer phpcs` (corrección automática: `vendor/bin/phpcbf`) |
 | Jest | este repo | `npm test` |
