@@ -154,7 +154,6 @@ final class PodcastFeedRenderer {
 				'guid'         => $this->guid( $post ),
 				'pub_date'     => Xml::rfc2822( $post->post_date_gmt ),
 				'summary'      => $summary,
-				'content_html' => $this->content_html( $post ),
 				'audio'        => $audio,
 				'explicit'     => (string) apply_filters( 'lb_sp_episode_explicit', $channel['explicit'], $post ),
 				'episode_type' => (string) apply_filters( 'lb_sp_episode_type', 'full', $post ),
@@ -213,23 +212,24 @@ final class PodcastFeedRenderer {
 	}
 
 	/**
-	 * Resumen en texto plano (extracto o primeras palabras).
+	 * Resumen en texto plano (extracto o contenido completo hasta 4000 caracteres).
 	 *
 	 * @param WP_Post $post Post.
 	 */
 	private function summary( WP_Post $post ): string {
-		$source = '' !== trim( $post->post_excerpt ) ? $post->post_excerpt : wp_trim_words( strip_shortcodes( $post->post_content ), 55, '…' );
-		return mb_substr( Xml::plain( $source ), 0, 4000 );
-	}
+		$source = '' !== trim( $post->post_excerpt ) ? $post->post_excerpt : strip_shortcodes( $post->post_content );
+		$plain  = Xml::plain( $source );
 
-	/**
-	 * Contenido HTML completo del episodio (para content:encoded).
-	 *
-	 * @param WP_Post $post Post.
-	 */
-	private function content_html( WP_Post $post ): string {
-		$html = apply_filters( 'the_content', $post->post_content ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Filtro de WordPress.
-		return is_string( $html ) ? $html : '';
+		if ( mb_strlen( $plain, 'UTF-8' ) <= 4000 ) {
+			return $plain;
+		}
+
+		$slice = mb_substr( $plain, 0, 3999, 'UTF-8' );
+		$next  = mb_substr( $plain, 3999, 1, 'UTF-8' );
+		$cut   = 1 === preg_match( '/^\s/u', $next ) ? $slice : (string) preg_replace( '/\s+\S*$/u', '', $slice );
+		$base  = '' !== trim( $cut ) ? rtrim( $cut ) : rtrim( $slice );
+
+		return $base . '…';
 	}
 
 	/**

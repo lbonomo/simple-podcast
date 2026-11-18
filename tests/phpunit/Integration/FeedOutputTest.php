@@ -239,12 +239,87 @@ final class FeedOutputTest extends WP_UnitTestCase {
 		$this->assertStringContainsString( '<title>Rock &amp; Roll &quot;vivo&quot; es l&apos;mejor</title>', $body );
 	}
 
-	public function test_content_encoded_is_cdata_safe(): void {
-		$this->episode( array( 'post_content' => 'Texto ]]> raro <strong>negrita</strong>' ) );
+	public function test_content_encoded_uses_summary_and_is_cdata_safe(): void {
+		$this->episode(
+			array(
+				'post_excerpt' => '',
+				'post_content' => 'Texto ]]> raro <strong>negrita</strong>',
+			)
+		);
 
-		$xml = $this->xml();
+		$item    = $this->xml()->channel->item[0];
+		$encoded = (string) $item->children( 'http://purl.org/rss/1.0/modules/content/' )->encoded;
 
-		$this->assertStringContainsString( 'negrita', (string) $xml->channel->item[0]->children( 'http://purl.org/rss/1.0/modules/content/' )->encoded );
+		$this->assertSame( 'Texto ]]> raro negrita', $encoded );
+		$this->assertSame( (string) $item->description, $encoded );
+	}
+
+	public function test_summary_uses_full_content_when_excerpt_empty_and_caps_at_4000_chars(): void {
+		$words    = implode( ' ', array_fill( 0, 80, 'palabra' ) );
+		$first_id = $this->episode(
+			array(
+				'post_excerpt' => '',
+				'post_content' => $words,
+			)
+		);
+
+		$item = $this->xml()->channel->item[0];
+		$this->assertSame( $words, (string) $item->description );
+
+		wp_delete_post( $first_id, true );
+		delete_transient( 'lb_sp_feed_body' );
+
+		$long_text = implode( ' ', array_fill( 0, 700, 'episodio' ) );
+		$this->episode(
+			array(
+				'post_excerpt' => '',
+				'post_content' => $long_text,
+			)
+		);
+
+		$long_item   = $this->xml()->channel->item[0];
+		$description = (string) $long_item->description;
+		$itunes      = $long_item->children( self::ITUNES );
+		$encoded     = (string) $long_item->children( 'http://purl.org/rss/1.0/modules/content/' )->encoded;
+
+		$this->assertLessThanOrEqual( 4000, mb_strlen( $description, 'UTF-8' ) );
+		$this->assertStringEndsWith( '…', $description );
+		$this->assertSame( $description, (string) $itunes->summary );
+		$this->assertSame( $description, $encoded );
+	}
+
+	public function test_summary_removes_useless_whitespace_and_preserves_paragraphs(): void {
+		$html = "<!-- wp:paragraph -->\n<p>  Hola\t\tmundo&nbsp;&nbsp;cruel.  </p>\n<!-- /wp:paragraph -->\n\n\n\n"
+			. "<!-- wp:paragraph -->\n<p>   </p>\n<!-- /wp:paragraph -->\n\n"
+			. "<!-- wp:heading -->\n<h2>Fuentes</h2>\n<!-- /wp:heading -->\n\n"
+			. "<!-- wp:list -->\n<ul>\n  <li>  <a href=\"https://example.org/1\">Uno</a>  </li>\n  <li>  <a href=\"https://example.org/2\">Dos</a>  </li>\n</ul>\n<!-- /wp:list -->";
+
+		$this->episode(
+			array(
+				'post_excerpt' => '',
+				'post_content' => $html,
+			)
+		);
+
+		$item     = $this->xml()->channel->item[0];
+		$expected = "Hola mundo cruel.\n\nFuentes\n\nUno\nDos";
+
+		$this->assertSame( $expected, (string) $item->description );
+		$this->assertSame( $expected, (string) $item->children( self::ITUNES )->summary );
+		$this->assertSame( $expected, (string) $item->children( 'http://purl.org/rss/1.0/modules/content/' )->encoded );
+	}
+
+	public function test_summary_prefers_post_excerpt_over_post_content(): void {
+		$this->episode(
+			array(
+				'post_excerpt' => "  Resumen   corto  \r\n\r\n\r\n  Segunda línea.  ",
+				'post_content' => 'Contenido largo que no debe usarse.',
+			)
+		);
+
+		$item = $this->xml()->channel->item[0];
+
+		$this->assertSame( "Resumen corto\n\nSegunda línea.", (string) $item->description );
 	}
 
 	public function test_channel_uses_settings(): void {

@@ -4,7 +4,7 @@ Tags: podcast, rss, audio, mp3, mcp
 Requires at least: 6.4
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -72,6 +72,10 @@ La ruta de entrega del plugin admite HEAD y rangos simples de bytes. Los archivo
 La URL del audio usa el parámetro `lb_sp_audio` (por ejemplo `https://ejemplo.com/mi-entrada/?lb_sp_audio=123&lb_sp_attachment=456`). El plugin pide no cachear esa respuesta (`DONOTCACHEPAGE` y cabeceras `Cache-Control`), pero algunas cachés de página del hosting o de un CDN lo ignoran y sirven la página HTML de la entrada. En ese caso, excluye de la caché de página las URL que contengan el parámetro `lb_sp_audio`, desde el panel del hosting o del plugin de caché. Después purga la caché y comprueba con `curl -I <url>` que la respuesta es `audio/mpeg`.
 
 == Changelog ==
+= 1.1.0 =
+* Usa el resumen en texto plano (`summary`, hasta 4000 caracteres) en `<content:encoded>`, `<description>` e `<itunes:summary>` del feed XML, tomando el contenido completo de la entrada si no hay extracto.
+* Elimina espacios y saltos de línea innecesarios en el texto plano del feed XML preservando los saltos de párrafo.
+
 = 1.0.0 =
 * Seguridad: todo el menú Podcast (Dashboard, Setup y Logs) y el guardado de ajustes quedan restringidos a administradores; las pantallas responden 403 al resto de usuarios.
 * Seguridad: límite de solicitudes por IP en la entrega de audio (120 por minuto por defecto, respuesta 429 con Retry-After). Filtros `lb_sp_throttle_limit` y `lb_sp_throttle_window`.
