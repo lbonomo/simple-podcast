@@ -1,6 +1,6 @@
 # Local development and testing
 
-The local WordPress environment uses [`wp-env`](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-env/) (Docker). See [docs/setup.md](docs/setup.md) for full setup and troubleshooting details.
+The local WordPress environment uses [`wp-env`](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-env/) (Docker). See [docs/setup.md](docs/setup.md) for project-specific setup and [docs/wp-env.md](docs/wp-env.md) for the `wp-env` reference guide (Docker runtimes, reset commands, troubleshooting, and upstream resources).
 
 ## Setup
 

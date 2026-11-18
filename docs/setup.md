@@ -1,6 +1,6 @@
 # Entorno de desarrollo
 
-El plugin se desarrolla con [`wp-env`](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-env/), que levanta un WordPress local con Docker y monta esta carpeta como plugin.
+El plugin se desarrolla con [`wp-env`](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-env/), que levanta un WordPress local con Docker y monta esta carpeta como plugin. Consulta [wp-env.md](wp-env.md) para la guía completa de instalación de Docker/runtimes, comandos de reinicio y solución de problemas.
 
 > La carpeta del plugin es `simple-podcast`, pero el slug, el archivo principal y el text domain son `lb-simple-podcast`. El zip de producción instala la carpeta `lb-simple-podcast/`.
 

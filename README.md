@@ -11,6 +11,7 @@ WordPress plugin (`lb-simple-podcast`) that turns standard posts into podcast ep
 - **Audio per Post:** Gutenberg sidebar panel (`assets/src/AudioPanel.js`) and Classic Editor meta box (`inc/Admin/MetaBox.php`) to select an MP3 from the Media Library. Validates real `audio/mpeg` MIME type, file size, and audio duration (`inc/Media/AudioValidator.php`).
 - **Podcast RSS Feed:** Publishes an RSS 2.0 feed with iTunes/Apple Podcasts tags at `/feed/podcast/` (`?feed=podcast`), including `<enclosure>`, persistent GUIDs, RFC 2822 dates, transient XML caching, `ETag`/`Last-Modified` conditional `304` responses, and `HEAD` support (`inc/Feed/`).
 - **Automatic Frontend Player:** Prepends an `<audio controls>` player to singular post content (`inc/Frontend/PlayerInjector.php`). Customizable via `.lb-sp-player` / `.lb-sp-player__audio` CSS, theme template override (`{theme}/lb-simple-podcast/player.php`), and `lb_sp_player_*` filters.
+- **Public Stats Shortcode (`[lb_podcast_stats]`):** Displays aggregated, PII-free podcast metrics (`estimated_listens`, `unique_listeners`, `published_audios`, and optional `top_episodes` / `clients`) on the frontend using static attributes (`days`, `post_id`, `show`, `limit`, `title`, `class`), strict public-episode validation, theme template override (`{theme}/lb-simple-podcast/stats.php`), on-demand CSS (`assets/css/stats.css`), and `lb_sp_stats_*` filters (`inc/Frontend/StatsShortcode.php`).
 - **Podcast Admin Menu (Administrators only):**
   - **Dashboard:** Published episode counts, latest audio, 30-day request totals, and top 5 episodes (`inc/Admin/DashboardPage.php`).
   - **Setup:** Channel metadata (title, description, language, cover image, Apple category, author, owner, explicit flag, copyright) and an unread error/notice log (`inc/Admin/SettingsPage.php`, `inc/Admin/ErrorsPanel.php`).
@@ -27,13 +28,13 @@ WordPress plugin (`lb-simple-podcast`) that turns standard posts into podcast ep
 ├── inc/                    # PSR-4 PHP classes (LbSimplePodcast\*)
 │   ├── Admin/              # Menu, Dashboard, Setup, Logs, ErrorsPanel, EditorAssets, MetaBox
 │   ├── Feed/               # FeedRegistrar, PodcastFeedRenderer, FeedVersion, Xml
-│   ├── Frontend/           # PlayerInjector
+│   ├── Frontend/           # PlayerInjector, StatsShortcode
 │   ├── Integrations/       # McpAbility, SeoHeaders
 │   ├── Media/              # AudioDelivery, AudioIngestor, AudioValidator, RequestThrottle
 │   ├── Meta/               # AudioMeta (_lb_sp_audio_id post meta & REST audio_data)
 │   └── Tracking/           # RequestLog, RequestStats, ErrorLog, ClientIp
-├── assets/                 # Gutenberg JS source (assets/src/), built bundle, classic JS, player CSS
-├── templates/              # Default RSS XML template (feed-podcast.php) and player (player.php)
+├── assets/                 # Gutenberg JS source (assets/src/), built bundle, classic JS, frontend/admin CSS
+├── templates/              # Default RSS XML template (feed-podcast.php), player (player.php), and public stats (stats.php)
 ├── scripts/                # Feed validator CLI (check-feed.js) and local log inspector
 ├── specs/                  # Playwright E2E test specs
 ├── tests/                  # PHPUnit unit & integration suites + PHPStan bootstrap
@@ -79,6 +80,7 @@ docker exec <tests-mysql-container> mysql -uroot -ppassword -e "CREATE DATABASE 
 
 - [Architecture overview](docs/architecture.md)
 - [Development & testing setup](docs/setup.md)
+- [`wp-env` reference guide (Spanish)](docs/wp-env.md)
 - [Database schema & options](docs/database.md)
 - [MCP Ability schema & usage](docs/mcp-tool-schema.md)
 - [Client IP detection behind proxies/CDNs](docs/ip-cliente-y-proxies.md)
