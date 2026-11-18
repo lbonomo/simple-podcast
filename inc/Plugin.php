@@ -93,19 +93,20 @@ final class Plugin {
 		 * @var array<string, object> $services
 		 */
 		$services = array(
-			'audio_meta'     => new Meta\AudioMeta(),
-			'audio_delivery' => new Media\AudioDelivery(),
-			'request_log'    => new Tracking\RequestLog(),
-			'error_log'      => new Tracking\ErrorLog(),
-			'errors_panel'   => new Admin\ErrorsPanel(),
-			'editor_assets'  => new Admin\EditorAssets(),
-			'meta_box'       => new Admin\MetaBox(),
-			'settings_page'  => new Admin\SettingsPage(),
-			'menu'           => new Admin\Menu(),
-			'feed'           => new Feed\FeedRegistrar(),
-			'player'         => new Frontend\PlayerInjector(),
-			'seo_headers'    => new Integrations\SeoHeaders(),
-			'mcp_ability'    => new Integrations\McpAbility(),
+			'audio_meta'      => new Meta\AudioMeta(),
+			'audio_delivery'  => new Media\AudioDelivery(),
+			'request_log'     => new Tracking\RequestLog(),
+			'error_log'       => new Tracking\ErrorLog(),
+			'errors_panel'    => new Admin\ErrorsPanel(),
+			'editor_assets'   => new Admin\EditorAssets(),
+			'meta_box'        => new Admin\MetaBox(),
+			'settings_page'   => new Admin\SettingsPage(),
+			'menu'            => new Admin\Menu(),
+			'feed'            => new Feed\FeedRegistrar(),
+			'player'          => new Frontend\PlayerInjector(),
+			'stats_shortcode' => new Frontend\StatsShortcode(),
+			'seo_headers'     => new Integrations\SeoHeaders(),
+			'mcp_ability'     => new Integrations\McpAbility(),
 		);
 
 		foreach ( $services as $id => $service ) {

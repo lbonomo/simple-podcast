@@ -35,11 +35,13 @@ final class AdminMenuTest extends WP_UnitTestCase {
 		$this->mp3_id = (int) self::factory()->attachment->create_upload_object( dirname( __DIR__ ) . '/fixtures/sample.mp3' );
 		( new RequestLog() )->upgrade();
 		$this->clear_log();
+		RequestStats::invalidate_cache();
 	}
 
 	public function tear_down(): void {
 		$this->clear_log();
-		unset( $_GET['paged'] );
+		RequestStats::invalidate_cache();
+		unset( $_GET['paged'], $_GET['days'], $_GET['post_id'] );
 		parent::tear_down();
 	}
 
@@ -61,7 +63,24 @@ final class AdminMenuTest extends WP_UnitTestCase {
 	}
 
 	private function log_row( int $post_id, int $status = 200, string $when = 'now' ): void {
+		$this->log_row_custom(
+			$post_id,
+			array(
+				'status' => $status,
+				'when'   => $when,
+			)
+		);
+	}
+
+	/**
+	 * Inserta una fila de registro personalizable.
+	 *
+	 * @param int                  $post_id   Entrada.
+	 * @param array<string, mixed> $overrides Campos a sobrescribir.
+	 */
+	private function log_row_custom( int $post_id, array $overrides = array() ): void {
 		global $wpdb;
+		$when = isset( $overrides['when'] ) && is_string( $overrides['when'] ) ? $overrides['when'] : 'now';
 		$wpdb->insert( // phpcs:ignore WordPress.DB
 			RequestLog::table(),
 			array(
@@ -69,11 +88,11 @@ final class AdminMenuTest extends WP_UnitTestCase {
 				'post_id'       => $post_id,
 				'attachment_id' => 123,
 				'user_id'       => 0,
-				'method'        => 'GET',
-				'remote_addr'   => '127.0.0.1',
+				'method'        => $overrides['method'] ?? 'GET',
+				'remote_addr'   => $overrides['remote_addr'] ?? '127.0.0.1',
 				'request_url'   => 'http://example.org/?x=<b>',
-				'headers'       => '{}',
-				'status'        => $status,
+				'headers'       => $overrides['headers'] ?? '{}',
+				'status'        => $overrides['status'] ?? 200,
 			)
 		);
 	}
@@ -283,5 +302,173 @@ final class AdminMenuTest extends WP_UnitTestCase {
 	public function test_logs_page_without_rows(): void {
 		$html = $this->output( array( new LogsPage(), 'render' ) );
 		$this->assertStringContainsString( 'Sin solicitudes registradas', $html );
+	}
+
+	public function test_dashboard_data_excludes_head_and_bots_and_deduplicates_listens(): void {
+		$ep1 = $this->episode( 'Ep Uno', '-2 days' );
+		$ep2 = $this->episode( 'Ep Dos', '-1 day' );
+
+		// Mismo oyente (IP + UA + día + episodio): 1 GET 200 + 3 GET 206 => 1 escucha estimada, 4 GET.
+		$this->log_row_custom(
+			$ep1,
+			array(
+				'remote_addr' => '192.0.2.10',
+				'headers'     => '{"User-Agent":"Mozilla/5.0 Chrome/120.0.0.0"}',
+				'status'      => 200,
+			)
+		);
+		foreach ( range( 1, 3 ) as $unused ) {
+			$this->log_row_custom(
+				$ep1,
+				array(
+					'remote_addr' => '192.0.2.10',
+					'headers'     => '{"USER-AGENT":"Mozilla/5.0 Chrome/120.0.0.0"}',
+					'status'      => 206,
+				)
+			);
+		}
+
+		// Segundo oyente en otro episodio.
+		$this->log_row_custom(
+			$ep2,
+			array(
+				'remote_addr' => '198.51.100.20',
+				'headers'     => '{"USER-AGENT":"AppleCoreMedia/1.0.0"}',
+				'status'      => 200,
+			)
+		);
+
+		// Ruido y errores que deben apartarse de escuchas estimadas y GET válidos.
+		$this->log_row_custom(
+			$ep1,
+			array(
+				'method'      => 'HEAD',
+				'remote_addr' => '192.0.2.30',
+				'status'      => 200,
+			)
+		);
+		$this->log_row_custom(
+			$ep1,
+			array(
+				'method'      => 'GET',
+				'remote_addr' => '192.0.2.40',
+				'headers'     => '{"USER-AGENT":"Mozilla/5.0 (compatible; Googlebot/2.1)"}',
+				'status'      => 200,
+			)
+		);
+		$this->log_row_custom(
+			$ep1,
+			array(
+				'method'      => 'GET',
+				'remote_addr' => '192.0.2.41',
+				'headers'     => '{"USER-AGENT":"curl/8.5.0"}',
+				'status'      => 200,
+			)
+		);
+		$this->log_row_custom(
+			$ep1,
+			array(
+				'method'      => 'GET',
+				'remote_addr' => '192.0.2.50',
+				'status'      => 416,
+			)
+		);
+		$this->log_row_custom(
+			$ep1,
+			array(
+				'method'      => 'GET',
+				'remote_addr' => '192.0.2.51',
+				'status'      => 302,
+			)
+		);
+
+		// Ventana anterior (-40 días).
+		$this->log_row_custom(
+			$ep1,
+			array(
+				'when'        => '-40 days',
+				'remote_addr' => '203.0.113.5',
+				'status'      => 200,
+			)
+		);
+
+		$data    = ( new RequestStats() )->dashboard_data( 30, 0 );
+		$summary = $data['summary'];
+
+		$this->assertSame( 2, $summary['estimated_listens'] );
+		$this->assertSame( 5, $summary['get_requests'] );
+		$this->assertSame( 2, $summary['unique_listeners'] );
+		$this->assertSame( 1, $summary['head_requests'] );
+		$this->assertSame( 2, $summary['bot_requests'] );
+		$this->assertSame( 2, $summary['error_requests'] );
+		$this->assertSame( 1, $summary['previous']['estimated_listens'] );
+		$this->assertCount( 30, $data['daily'] );
+		$this->assertCount( 2, $data['published'] );
+	}
+
+	public function test_dashboard_data_caches_for_one_hour_and_invalidates(): void {
+		$ep    = $this->episode( 'Cache Ep' );
+		$stats = new RequestStats();
+
+		$this->log_row_custom( $ep, array( 'remote_addr' => '192.0.2.1' ) );
+		$first = $stats->dashboard_data( 7, 0 );
+		$this->assertSame( 1, $first['summary']['estimated_listens'] );
+
+		// Inserta nueva fila sin invalidar caché: debe devolver el dato cacheado.
+		$this->log_row_custom( $ep, array( 'remote_addr' => '192.0.2.2' ) );
+		$cached = $stats->dashboard_data( 7, 0 );
+		$this->assertSame( 1, $cached['summary']['estimated_listens'] );
+
+		// Al invalidar la caché debe recalcular.
+		RequestStats::invalidate_cache();
+		$refreshed = $stats->dashboard_data( 7, 0 );
+		$this->assertSame( 2, $refreshed['summary']['estimated_listens'] );
+	}
+
+	public function test_client_classification_recognizes_podcast_apps_browsers_and_bots(): void {
+		$this->assertSame( 'apple_podcasts', RequestStats::classify_client( 'AppleCoreMedia/1.0.0.21A344' )['key'] );
+		$this->assertSame( 'spotify', RequestStats::classify_client( 'Spotify/8.8.0 iOS' )['key'] );
+		$this->assertSame( 'pocket_casts', RequestStats::classify_client( 'PocketCasts/1.0' )['key'] );
+		$this->assertSame( 'browser_chrome', RequestStats::classify_client( 'Mozilla/5.0 AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36' )['key'] );
+		$this->assertSame( 'browser_safari', RequestStats::classify_client( 'Mozilla/5.0 Version/17.0 Safari/605.1.15' )['key'] );
+		$this->assertSame( 'bot', RequestStats::classify_client( 'curl/8.4.0' )['key'] );
+		$this->assertSame( 'unknown', RequestStats::classify_client( '' )['key'] );
+		$this->assertFalse( RequestStats::is_bot_user_agent( '' ) );
+	}
+
+	public function test_dashboard_page_renders_filters_and_enqueues_assets(): void {
+		$ep1 = $this->episode( 'Episodio Filtrado' );
+		$ep2 = $this->episode( 'Otro Episodio' );
+		$this->log_row_custom(
+			$ep1,
+			array(
+				'remote_addr' => '198.51.100.1',
+				'headers'     => '{"USER-AGENT":"Spotify/8.9"}',
+			)
+		);
+		$this->log_row_custom(
+			$ep2,
+			array(
+				'remote_addr' => '198.51.100.2',
+				'headers'     => '{"USER-AGENT":"PocketCasts/1.0"}',
+			)
+		);
+
+		$_GET['days']    = '7';
+		$_GET['post_id'] = (string) $ep1;
+
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$page = new DashboardPage();
+		$page->enqueue( 'toplevel_page_' . Menu::PARENT_SLUG );
+		$this->assertTrue( wp_script_is( 'lb-sp-dashboard', 'enqueued' ) );
+		$this->assertTrue( wp_style_is( 'lb-sp-dashboard', 'enqueued' ) );
+
+		$html = $this->output( array( $page, 'render' ) );
+		$this->assertStringContainsString( 'Últimos 7 días', $html );
+		$this->assertStringContainsString( 'Episodio Filtrado', $html );
+		$this->assertStringContainsString( 'Spotify', $html );
+		$this->assertStringNotContainsString( 'Pocket Casts', $html );
+		$this->assertStringContainsString( 'lb-sp-trend-chart', $html );
+		$this->assertStringContainsString( 'lb-sp-clients-chart', $html );
 	}
 }

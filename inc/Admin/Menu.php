@@ -36,6 +36,7 @@ final class Menu {
 	/** Engancha los hooks. */
 	public function register(): void {
 		add_action( 'admin_menu', array( $this, 'add_menus' ) );
+		add_action( 'admin_post_' . DashboardPage::REFRESH_ACTION, array( new DashboardPage(), 'handle_refresh' ) );
 		// Prioridad 5: antes del enlace "Check for updates" (prioridad 10).
 		add_filter( 'plugin_row_meta', array( $this, 'row_meta' ), 5, 2 );
 	}
@@ -65,6 +66,7 @@ final class Menu {
 		$setup     = new SettingsPage();
 		$logs      = new LogsPage();
 
+		add_action( 'admin_enqueue_scripts', array( $dashboard, 'enqueue' ) );
 		add_action( 'admin_enqueue_scripts', array( $logs, 'enqueue' ) );
 
 		add_menu_page(
