@@ -2,7 +2,7 @@
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 3,
 	"name": "lb-simple-podcast/podcast-stats",
-	"version": "1.1.0",
+	"version": "1.2.0",
 	"title": "Estadísticas del podcast",
 	"category": "widgets",
 	"icon": "chart-bar",
