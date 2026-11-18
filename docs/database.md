@@ -85,8 +85,10 @@ No tiene claves foráneas. `post_id`, `attachment_id` y `user_id` apuntan a `wp_
 | `lb_sp_log_schema_version` | Versión del esquema de la tabla |
 | `lb_sp_errors` | Últimos 50 errores y avisos del plugin (fecha, origen, motivo, contexto, estado leído); sin autoload |
 | `lb_sp_errors_version` | Versión de la migración de los indicadores antiguos `lb_sp_log_error` y `lb_sp_storage_warning` |
+| `lb_sp_stats_version` | Versión de invalidación para la caché de estadísticas del Dashboard (`lb_sp_stats_*`); sin autoload |
 
 ## Transients
 
 - `lb_sp_feed_body`: caché del XML del feed.
+- `lb_sp_stats_*`: caché de 1 hora de los agregados del Dashboard (`RequestStats::dashboard_data()`).
 - Un transient por post con el mensaje de error del metabox, que dura 1 minuto.

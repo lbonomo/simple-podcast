@@ -87,25 +87,29 @@ final class Plugin {
 	private function register_services(): void {
 		add_action( 'init', array( $this, 'load_textdomain' ) );
 
+		$stats_shortcode = new Frontend\StatsShortcode();
+
 		/**
 		 * Servicios del plugin (id => instancia). Cada uno puede exponer register().
 		 *
 		 * @var array<string, object> $services
 		 */
 		$services = array(
-			'audio_meta'     => new Meta\AudioMeta(),
-			'audio_delivery' => new Media\AudioDelivery(),
-			'request_log'    => new Tracking\RequestLog(),
-			'error_log'      => new Tracking\ErrorLog(),
-			'errors_panel'   => new Admin\ErrorsPanel(),
-			'editor_assets'  => new Admin\EditorAssets(),
-			'meta_box'       => new Admin\MetaBox(),
-			'settings_page'  => new Admin\SettingsPage(),
-			'menu'           => new Admin\Menu(),
-			'feed'           => new Feed\FeedRegistrar(),
-			'player'         => new Frontend\PlayerInjector(),
-			'seo_headers'    => new Integrations\SeoHeaders(),
-			'mcp_ability'    => new Integrations\McpAbility(),
+			'audio_meta'      => new Meta\AudioMeta(),
+			'audio_delivery'  => new Media\AudioDelivery(),
+			'request_log'     => new Tracking\RequestLog(),
+			'error_log'       => new Tracking\ErrorLog(),
+			'errors_panel'    => new Admin\ErrorsPanel(),
+			'editor_assets'   => new Admin\EditorAssets(),
+			'meta_box'        => new Admin\MetaBox(),
+			'settings_page'   => new Admin\SettingsPage(),
+			'menu'            => new Admin\Menu(),
+			'feed'            => new Feed\FeedRegistrar(),
+			'player'          => new Frontend\PlayerInjector(),
+			'stats_shortcode' => $stats_shortcode,
+			'stats_block'     => new Frontend\StatsBlock( $stats_shortcode ),
+			'seo_headers'     => new Integrations\SeoHeaders(),
+			'mcp_ability'     => new Integrations\McpAbility(),
 		);
 
 		foreach ( $services as $id => $service ) {

@@ -4,7 +4,7 @@ Tags: podcast, rss, audio, mp3, mcp
 Requires at least: 6.4
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 1.1.0
+Stable tag: 1.2.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -72,6 +72,10 @@ La ruta de entrega del plugin admite HEAD y rangos simples de bytes. Los archivo
 La URL del audio usa el parámetro `lb_sp_audio` (por ejemplo `https://ejemplo.com/mi-entrada/?lb_sp_audio=123&lb_sp_attachment=456`). El plugin pide no cachear esa respuesta (`DONOTCACHEPAGE` y cabeceras `Cache-Control`), pero algunas cachés de página del hosting o de un CDN lo ignoran y sirven la página HTML de la entrada. En ese caso, excluye de la caché de página las URL que contengan el parámetro `lb_sp_audio`, desde el panel del hosting o del plugin de caché. Después purga la caché y comprueba con `curl -I <url>` que la respuesta es `audio/mpeg`.
 
 == Changelog ==
+= 1.2.0 =
+* Mejora el Dashboard de estadísticas con gráficas SVG de tendencia diaria y clientes, filtro por período (7/30/90 días) y episodio, exclusión de tráfico HEAD/bots y caché de 1 hora.
+* Agrega el shortcode público `[lb_podcast_stats]` y el bloque de Gutenberg `lb-simple-podcast/podcast-stats` para mostrar métricas agregadas sin exponer datos personales ni episodios no públicos.
+
 = 1.1.0 =
 * Usa el resumen en texto plano (`summary`, hasta 4000 caracteres) en `<content:encoded>`, `<description>` e `<itunes:summary>` del feed XML, tomando el contenido completo de la entrada si no hay extracto.
 * Elimina espacios y saltos de línea innecesarios en el texto plano del feed XML preservando los saltos de párrafo.
