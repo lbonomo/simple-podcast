@@ -87,6 +87,8 @@ final class Plugin {
 	private function register_services(): void {
 		add_action( 'init', array( $this, 'load_textdomain' ) );
 
+		$stats_shortcode = new Frontend\StatsShortcode();
+
 		/**
 		 * Servicios del plugin (id => instancia). Cada uno puede exponer register().
 		 *
@@ -104,7 +106,8 @@ final class Plugin {
 			'menu'            => new Admin\Menu(),
 			'feed'            => new Feed\FeedRegistrar(),
 			'player'          => new Frontend\PlayerInjector(),
-			'stats_shortcode' => new Frontend\StatsShortcode(),
+			'stats_shortcode' => $stats_shortcode,
+			'stats_block'     => new Frontend\StatsBlock( $stats_shortcode ),
 			'seo_headers'     => new Integrations\SeoHeaders(),
 			'mcp_ability'     => new Integrations\McpAbility(),
 		);

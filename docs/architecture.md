@@ -58,7 +58,7 @@ Si no puede crearse una copia, se sirve el original local y se muestra un aviso.
 
 | Clase | Responsabilidad |
 | --- | --- |
-| `Plugin` | Bootstrap. `boot()` crea los servicios (`audio_meta`, `editor_assets`, `meta_box`, `settings_page`, `feed`, `player`, `stats_shortcode`, `seo_headers`, `mcp_ability`). `activate()` registra el feed y refresca las rewrite rules. |
+| `Plugin` | Bootstrap. `boot()` crea los servicios (`audio_meta`, `editor_assets`, `meta_box`, `settings_page`, `feed`, `player`, `stats_shortcode`, `stats_block`, `seo_headers`, `mcp_ability`). `activate()` registra el feed y refresca las rewrite rules. |
 | `Meta\AudioMeta` | `register_post_meta` de `_lb_sp_audio_id` (REST, `absint`, `auth_callback` → `edit_post`), bloqueo de escrituras inválidas, campo REST `audio_data`, y helpers `get_attachment_id()` / `get_audio_data()`. |
 | `Media\AudioValidator` | Mime real (`wp_check_filetype_and_ext` + `finfo`), tamaño máximo y duración (`wp_read_audio_metadata`). Devuelve `WP_Error` con códigos `lb_sp_*`. |
 | `Media\AudioIngestor` | Ingesta por URL (anti-SSRF, tope de tamaño, timeout) o base64 (tamaño estimado antes de decodificar, decodificación estricta). Reemplaza el audio anterior sin dejar huérfanos. |
@@ -69,6 +69,7 @@ Si no puede crearse una copia, se sirve el original local y se muestra un aviso.
 | `Tracking\RequestStats` | Consultas de lectura y agregación de la tabla de solicitudes (incluye clasificación de `User-Agent`, detección de bots, caché en transient de 1 h y `public_stats()` sin PII para el frontend). |
 | `Frontend\PlayerInjector` | Inyección automática del reproductor HTML5 en `the_content` (`templates/player.php`). |
 | `Frontend\StatsShortcode` | Shortcode público `[lb_podcast_stats]` (`templates/stats.php`, CSS bajo demanda `assets/css/stats.css`). |
+| `Frontend\StatsBlock` | Bloque dinámico de Gutenberg `lb-simple-podcast/podcast-stats` (`inc/Frontend/block.json`, `assets/src/stats-block.js`), delega el renderizado seguro en `StatsShortcode`. |
 | `Admin\SettingsPage` | Ajustes del canal (Podcast > Setup), opción `lb_sp_channel`. |
 | `Feed\FeedRegistrar` | `add_feed( 'podcast' )`, cabeceras, invalidación de caché. |
 | `Feed\PodcastFeedRenderer` | Query, datos del canal/episodios, ETag/Last-Modified/304 y caché del cuerpo. |

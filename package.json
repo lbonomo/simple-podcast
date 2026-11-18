@@ -8,12 +8,12 @@
 		"node": ">=26"
 	},
 	"scripts": {
-		"build": "wp-scripts build --webpack-src-dir=assets/src --output-path=assets/build",
+		"build": "wp-scripts build --webpack-src-dir=assets/src --output-path=assets/build index.js stats-block.js",
 		"check:feed": "node scripts/check-feed.js",
 		"env:start": "wp-env start",
 		"logs": "wp-env run cli -- wp eval-file wp-content/plugins/simple-podcast/scripts/list-audio-logs.php",
 		"prestart": "node scripts/check-composer-vendor.js",
-		"start": "wp-scripts start --webpack-src-dir=assets/src --output-path=assets/build",
+		"start": "wp-scripts start --webpack-src-dir=assets/src --output-path=assets/build index.js stats-block.js",
 		"test": "wp-scripts test-unit-jest --config=jest.config.js",
 		"test:e2e": "wp-scripts test-e2e",
 		"lint:js": "wp-scripts lint-js assets/src"

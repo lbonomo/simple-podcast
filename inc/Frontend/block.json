@@ -1,0 +1,66 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "lb-simple-podcast/podcast-stats",
+	"version": "1.1.0",
+	"title": "Estadísticas del podcast",
+	"category": "widgets",
+	"icon": "chart-bar",
+	"description": "Muestra estadísticas públicas agregadas del podcast sin exponer datos personales.",
+	"textdomain": "lb-simple-podcast",
+	"keywords": [ "podcast", "stats", "estadísticas", "escuchas" ],
+	"editorScript": "lb-sp-stats-block",
+	"style": "lb-sp-stats",
+	"supports": {
+		"html": false,
+		"align": [ "wide", "full" ],
+		"multiple": true
+	},
+	"attributes": {
+		"days": {
+			"type": "integer",
+			"default": 30,
+			"enum": [ 7, 30, 90 ]
+		},
+		"scope": {
+			"type": "string",
+			"default": "all",
+			"enum": [ "all", "current", "episode" ]
+		},
+		"postId": {
+			"type": "integer",
+			"default": 0,
+			"minimum": 0
+		},
+		"showListens": {
+			"type": "boolean",
+			"default": true
+		},
+		"showListeners": {
+			"type": "boolean",
+			"default": true
+		},
+		"showEpisodes": {
+			"type": "boolean",
+			"default": true
+		},
+		"showTopEpisodes": {
+			"type": "boolean",
+			"default": false
+		},
+		"showClients": {
+			"type": "boolean",
+			"default": false
+		},
+		"limit": {
+			"type": "integer",
+			"default": 5,
+			"minimum": 1,
+			"maximum": 10
+		},
+		"title": {
+			"type": "string",
+			"default": ""
+		}
+	}
+}
