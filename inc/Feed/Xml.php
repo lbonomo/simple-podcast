@@ -15,13 +15,20 @@ namespace LbSimplePodcast\Feed;
 final class Xml {
 
 	/**
-	 * Texto plano: sin HTML, entidades decodificadas, sin caracteres de control.
+	 * Texto plano: sin HTML, entidades decodificadas, sin caracteres de control ni espacios inútiles.
 	 *
 	 * @param string $value Texto de origen (puede contener HTML o entidades).
 	 */
 	public static function plain( string $value ): string {
+		$value = (string) preg_replace( '#<br\s*/?>#i', "\n", $value );
+		$value = (string) preg_replace( '#</(li|tr)>(?!\r?\n)#i', "</$1>\n", $value );
+		$value = (string) preg_replace( '#</(p|div|h[1-6]|blockquote|ul|ol)>#i', "</$1>\n\n", $value );
 		$value = html_entity_decode( wp_strip_all_tags( $value ), ENT_QUOTES | ENT_HTML5, 'UTF-8' );
 		$value = (string) preg_replace( '/[^\P{C}\t\n\r]+/u', '', $value );
+		$value = str_replace( array( "\r\n", "\r" ), "\n", $value );
+		$value = (string) preg_replace( '/[^\S\n]+/u', ' ', $value );
+		$value = (string) preg_replace( '/ *\n */', "\n", $value );
+		$value = (string) preg_replace( '/\n{3,}/', "\n\n", $value );
 		return trim( $value );
 	}
 

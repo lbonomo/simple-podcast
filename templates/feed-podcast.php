@@ -75,7 +75,7 @@ echo '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
 		<pubDate><?php echo Xml::text( (string) $item['pub_date'] ); ?></pubDate>
 		<description><?php echo Xml::text( (string) $item['summary'] ); ?></description>
 		<itunes:summary><?php echo Xml::text( (string) $item['summary'] ); ?></itunes:summary>
-		<content:encoded><?php echo Xml::cdata( (string) $item['content_html'] ); ?></content:encoded>
+		<content:encoded><?php echo Xml::cdata( (string) $item['summary'] ); ?></content:encoded>
 		<enclosure url="<?php echo Xml::text( (string) $audio['url'] ); ?>" length="<?php echo (int) $audio['filesize']; ?>" type="<?php echo Xml::text( (string) $audio['mime_type'] ); ?>" />
 	<?php if ( (int) $audio['duration'] > 0 ) : ?>
 		<itunes:duration><?php echo Xml::duration( (int) $audio['duration'] ); ?></itunes:duration>
